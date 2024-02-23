@@ -5,25 +5,24 @@ namespace Factory
 {
     public abstract class AbstractFactory
     {
+        private Dictionary<string, Func<ILoadableFromString>> _instances;
+        protected AbstractFactory()
+        {
+            _instances = new Dictionary<string, Func<ILoadableFromString>>()
+            {
+                {"C", CreateCrew},
+                {"P", CreatePassenger},
+                {"CA", CreateCargo},
+                {"CP", CreateCargoPlane},
+                {"PP", CreatePassengerPlane},
+                {"AI", CreateAirport},
+                {"FL", CreateFlight}
+            };
+        }
         public ILoadableFromString? Create(string type)
         {
-            switch (type)
-            {
-                case "Airport":
-                    return CreateAirport();
-                case "Cargo":
-                    return CreateCargo();
-                case "CargoPlane":
-                    return CreateCargoPlane();
-                case "Crew":
-                    return CreateCrew();
-                case "Passenger":
-                    return CreatePassenger();
-                case "PassengerPlane":
-                    return CreatePassengerPlane();
-                default:
-                    return null;
-            }
+            if (!_instances.ContainsKey(type)) throw new ArgumentException("Invalid type");
+            return _instances[type]();
         }
 
         // Create methods for each class
@@ -33,6 +32,7 @@ namespace Factory
         public abstract ILoadableFromString CreateCrew();
         public abstract ILoadableFromString CreatePassenger();
         public abstract ILoadableFromString CreatePassengerPlane();
+        public abstract ILoadableFromString CreateFlight();
     }
 
     public class BaseFactory : AbstractFactory
@@ -60,6 +60,10 @@ namespace Factory
         public override ILoadableFromString CreatePassengerPlane()
         {
             return new PassengerPlane();
+        }
+        public override ILoadableFromString CreateFlight()
+        {
+            return new Flight();
         }
     }
 

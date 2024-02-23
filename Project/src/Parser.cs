@@ -11,16 +11,15 @@ namespace FileParser
     {
         public override IEnumerable<string[]> ParseFile(string filePath)
         {
-            using (StreamReader reader = new StreamReader(filePath))
+            if (!File.Exists(filePath))
             {
-                string? line;
-
-                while (!reader.EndOfStream)
-                {
-                    line = reader.ReadLine();
-                    if (line == null) yield break;
-                    yield return line.Split(',');
-                }
+                throw new FileNotFoundException();
+            }
+            using StreamReader reader = new StreamReader(filePath);
+            string? line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                yield return line.Split(',');
             }
         }
 

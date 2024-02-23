@@ -1,3 +1,4 @@
+using DataTransformation.FileParser;
 namespace Classes
 {
     public class Flight : ILoadableFromString
@@ -26,8 +27,8 @@ namespace Classes
             Latitude = Single.Parse(data[6]);
             AMSL = Single.Parse(data[7]);
             PlaneID = int.Parse(data[8]);
-            Crew = FileParser.FTRParser.ParseArray<int>(data[9]);
-            Load = FileParser.FTRParser.ParseArray<int>(data[10]);
+            Crew = FTRParser.ParseArray<int>(data[9]);
+            Load = FTRParser.ParseArray<int>(data[10]);
         }
     }
 }

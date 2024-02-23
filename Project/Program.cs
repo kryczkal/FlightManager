@@ -1,11 +1,16 @@
-﻿using System.IO;
-using FileParser;
+﻿using DataTransformation.FileParser;
+using DataTransformation;
 using Factory;
 using Classes;
 
 public class Program
 {
     public static void Main(string[] args)
+    {
+        DeserializeExample();
+    }
+
+    private static void DeserializeExample()
     {
         string path = "assets/example_data.ftr";
         IParser parser = new FTRParser();

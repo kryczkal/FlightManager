@@ -19,7 +19,7 @@ namespace Factory
                 {"FL", CreateFlight}
             };
         }
-        public ILoadableFromString? Create(string type)
+        public ILoadableFromString Create(string type)
         {
             if (!_instances.ContainsKey(type)) throw new ArgumentException("Invalid type");
             return _instances[type]();

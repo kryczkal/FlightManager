@@ -2,14 +2,14 @@ using System.ComponentModel;
 
 namespace FileParser
 {
-    public abstract class AbstractParser
+    public interface IParser
     {
-        public abstract IEnumerable<string[]> ParseFile(string path);
+        IEnumerable<string[]> ParseFile(string path);
     }
 
-    public class FTRParser : AbstractParser
+    public class FTRParser : IParser
     {
-        public override IEnumerable<string[]> ParseFile(string filePath)
+        public IEnumerable<string[]> ParseFile(string filePath)
         {
             if (!File.Exists(filePath))
             {

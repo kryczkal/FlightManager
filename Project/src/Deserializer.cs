@@ -2,8 +2,18 @@ using Classes;
 using Factory;
 using FileParser;
 
+/// <summary>
+/// Provides methods for deserializing data from a file using a specified factory and parser.
+/// </summary>
 public static class Deserializer
 {
+    /// <summary>
+    /// Deserializes data from a file and returns a dictionary of instances.
+    /// </summary>
+    /// <param name="path">The path to the file.</param>
+    /// <param name="factory">The factory used to create instances.</param>
+    /// <param name="parser">The parser used to parse the file.</param>
+    /// <returns>A dictionary of instances, where the key is the type (as string) and the value is a list of instances of that type.</returns>
     public static Dictionary<string, List<ILoadableFromString>> Deserialize(string path, AbstractFactory factory, IParser parser)
     {
         Dictionary<string, List<ILoadableFromString>> instances = new Dictionary<string, List<ILoadableFromString>>();

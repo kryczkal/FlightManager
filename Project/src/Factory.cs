@@ -3,6 +3,9 @@ using Classes;
 
 namespace Factory
 {
+    /// <summary>
+    /// Represents an abstract factory that creates instances of objects implementing the <see cref="ILoadableFromString"/> interface.
+    /// </summary>
     public abstract class AbstractFactory
     {
         private Dictionary<string, Func<ILoadableFromString>> _instances;
@@ -35,6 +38,9 @@ namespace Factory
         public abstract ILoadableFromString CreateFlight();
     }
 
+    /// <summary>
+    /// Represents a base factory that implements the abstract factory pattern.
+    /// </summary>
     public class BaseFactory : AbstractFactory
     {
         public override ILoadableFromString CreateAirport()

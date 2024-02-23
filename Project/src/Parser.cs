@@ -2,13 +2,27 @@ using System.ComponentModel;
 
 namespace FileParser
 {
+    /// <summary>
+    /// Represents an interface for parsing files.
+    /// </summary>
     public interface IParser
     {
+        /// <summary>
+        /// Parses the specified file and returns the parsed data as an enumerable of string arrays.
+        /// </summary>
+        /// <param name="path">The path of the file to parse.</param>
+        /// <returns>An enumerable of string arrays representing the parsed data.</returns>
         IEnumerable<string[]> ParseFile(string path);
     }
 
     public class FTRParser : IParser
     {
+        /// <summary>
+        /// Parses a file and returns an enumerable collection of string arrays.
+        /// Each string array represents a line in the file, with each element being a comma-separated value.
+        /// </summary>
+        /// <param name="filePath">The path of the file to parse.</param>
+        /// <returns>An enumerable collection of string arrays representing the lines in the file.</returns>
         public IEnumerable<string[]> ParseFile(string filePath)
         {
             if (!File.Exists(filePath))

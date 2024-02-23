@@ -1,0 +1,13 @@
+.vscode/
+[Bb]in/
+[Oo]bj/
+packages/
+*.[Tt]mp
+*.[Bb]ak
+*.[Ll]og
+*.[Dd]ll
+*.[Ee]xe
+*.[Cc]ache
+*.[Pp]db
+*.[Tt]log
+*.DS_Store

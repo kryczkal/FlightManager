@@ -1,22 +1,23 @@
 using DataTransformation.FileParser;
-namespace Classes
+using DataTransformation.StringFormatter;
+namespace DataTransformation
 {
-    public class Flight : ILoadableFromString
+    public class Flight : ISerializable
     {
-        int ID;
-        int Origin; // As Airport ID
-        int Target; // As Airport ID
-        string TakeoffTime;
-        string LandingTime;
-        Single Longitude;
-        Single Latitude;
-        Single AMSL;
+        public int ID { get; set; }
+        public int Origin { get; set; } // As Airport ID
+        public int Target { get; set; } // As Airport ID
+        public string TakeoffTime { get; set; }
+        public string LandingTime { get; set; }
+        public Single Longitude { get; set; }
+        public Single Latitude { get; set; }
+        public Single AMSL { get; set; }
 
-        int PlaneID;
-        int[] Crew; // As their IDs
-        int[] Load; // As Cargo IDs
+        public int PlaneID { get; set; }
+        public int[] Crew { get; set; } // As their IDs
+        public int[] Load { get; set; } // As Cargo IDs
 
-        void ILoadableFromString.LoadFromString(string[] data)
+        void ILoadableFromString.InitializeFromString(string[] data)
         {
             ID = int.Parse(data[0]);
             Origin = int.Parse(data[1]);
@@ -29,6 +30,23 @@ namespace Classes
             PlaneID = int.Parse(data[8]);
             Crew = FTRParser.ParseArray<int>(data[9]);
             Load = FTRParser.ParseArray<int>(data[10]);
+        }
+
+        string[] IConvertableToString.FormatToString()
+        {
+            string[] data = new string[11];
+            data[0] = ID.ToString();
+            data[1] = Origin.ToString();
+            data[2] = Target.ToString();
+            data[3] = TakeoffTime;
+            data[4] = LandingTime;
+            data[5] = Longitude.ToString();
+            data[6] = Latitude.ToString();
+            data[7] = AMSL.ToString();
+            data[8] = PlaneID.ToString();
+            data[9] = FTRFormatter.FormatArray<int>(Crew);
+            data[10] = FTRFormatter.FormatArray<int>(Load);
+            return data;
         }
     }
 }

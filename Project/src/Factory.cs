@@ -1,17 +1,17 @@
 using System.Runtime.InteropServices.Marshalling;
-using Classes;
+using DataTransformation;
 
 namespace Factory
 {
     /// <summary>
-    /// Represents an abstract factory that creates instances of objects implementing the <see cref="ILoadableFromString"/> interface.
+    /// Represents an abstract factory that creates instances of objects implementing the <see cref="ISerializable"/> interface.
     /// </summary>
     public abstract class AbstractFactory
     {
-        private Dictionary<string, Func<ILoadableFromString>> _instances;
+        private Dictionary<string, Func<ISerializable>> _instances;
         protected AbstractFactory()
         {
-            _instances = new Dictionary<string, Func<ILoadableFromString>>()
+            _instances = new Dictionary<string, Func<ISerializable>>()
             {
                 {"C", CreateCrew},
                 {"P", CreatePassenger},
@@ -22,20 +22,20 @@ namespace Factory
                 {"FL", CreateFlight}
             };
         }
-        public ILoadableFromString Create(string type)
+        public ISerializable Create(string type)
         {
             if (!_instances.ContainsKey(type)) throw new ArgumentException("Invalid type");
             return _instances[type]();
         }
 
         // Create methods for each class
-        public abstract ILoadableFromString CreateAirport();
-        public abstract ILoadableFromString CreateCargo();
-        public abstract ILoadableFromString CreateCargoPlane();
-        public abstract ILoadableFromString CreateCrew();
-        public abstract ILoadableFromString CreatePassenger();
-        public abstract ILoadableFromString CreatePassengerPlane();
-        public abstract ILoadableFromString CreateFlight();
+        public abstract ISerializable CreateAirport();
+        public abstract ISerializable CreateCargo();
+        public abstract ISerializable CreateCargoPlane();
+        public abstract ISerializable CreateCrew();
+        public abstract ISerializable CreatePassenger();
+        public abstract ISerializable CreatePassengerPlane();
+        public abstract ISerializable CreateFlight();
     }
 
     /// <summary>
@@ -43,31 +43,31 @@ namespace Factory
     /// </summary>
     public class BaseFactory : AbstractFactory
     {
-        public override ILoadableFromString CreateAirport()
+        public override ISerializable CreateAirport()
         {
             return new Airport();
         }
-        public override ILoadableFromString CreateCargo()
+        public override ISerializable CreateCargo()
         {
             return new Cargo();
         }
-        public override ILoadableFromString CreateCargoPlane()
+        public override ISerializable CreateCargoPlane()
         {
             return new CargoPlane();
         }
-        public override ILoadableFromString CreateCrew()
+        public override ISerializable CreateCrew()
         {
             return new Crew();
         }
-        public override ILoadableFromString CreatePassenger()
+        public override ISerializable CreatePassenger()
         {
             return new Passenger();
         }
-        public override ILoadableFromString CreatePassengerPlane()
+        public override ISerializable CreatePassengerPlane()
         {
             return new PassengerPlane();
         }
-        public override ILoadableFromString CreateFlight()
+        public override ISerializable CreateFlight()
         {
             return new Flight();
         }

@@ -1,4 +1,4 @@
-using Classes;
+using DataTransformation;
 using Factory;
 using DataTransformation.FileParser;
 
@@ -16,24 +16,24 @@ namespace DataTransformation
         /// <param name="factory">The factory used to create instances.</param>
         /// <param name="parser">The parser used to parse the file.</param>
         /// <returns>A dictionary of instances, where the key is the type (as string) and the value is a list of instances of that type.</returns>
-        public static Dictionary<string, List<ILoadableFromString>> Deserialize(string path, AbstractFactory factory, IParser parser)
+        public static Dictionary<string, List<ISerializable>> Deserialize(string path, AbstractFactory factory, IParser parser)
         {
-            Dictionary<string, List<ILoadableFromString>> instances = new Dictionary<string, List<ILoadableFromString>>();
+            Dictionary<string, List<ISerializable>> instances = new Dictionary<string, List<ISerializable>>();
 
             IEnumerable<string[]> parsed_lines = parser.ParseFile(path);
 
             foreach (string[] parsed_line in parsed_lines)
             {
                 string type = parsed_line[0];
-                ILoadableFromString instance = factory.Create(type);
+                ISerializable instance = factory.Create(type);
 
                 string[] class_data = parsed_line.Skip(1).ToArray();
-                instance.LoadFromString(class_data);
+                instance.InitializeFromString(class_data);
 
                 if (instances.ContainsKey(parsed_line[0]))
                     instances[parsed_line[0]].Add(instance);
                 else
-                    instances.Add(parsed_line[0], new List<ILoadableFromString> { instance });
+                    instances.Add(parsed_line[0], new List<ISerializable> { instance });
             }
             return instances;
         }

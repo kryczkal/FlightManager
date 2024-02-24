@@ -37,6 +37,7 @@ public class FTRParserTests
     [Test]
     public void ParseFile_ValidFilePath_ReturnsParsedData()
     {
+        Console.WriteLine(Directory.GetCurrentDirectory());
         // Arrange
         string filePath = "../Project/assets/example_data.ftr";
         FTRParser parser = new FTRParser();

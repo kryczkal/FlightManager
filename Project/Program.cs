@@ -1,45 +1,60 @@
-﻿using DataTransformation.FileParser;
-using DataTransformation;
-using Factory;
-using DataTransformation;
-using DataTransformation.StringFormatter;
-using System.Text.Json;
+﻿using DataTransformation;
 
 public class Program
 {
     public static void Main(string[] args)
     {
-        DeserializeExample();
-        SeralizeExample();
+        List<IDataTransformable> data;
+        data = DeserializeExample();
+        SeralizeExample(data);
     }
 
-    private static void DeserializeExample()
+    private static List<IDataTransformable> DeserializeExample()
     {
+        // The data is stored in a file with the .ftr format
+        // Then we use the DeserializerFactory to create a deserializer for the .ftr format
+        // We use the deserializer to parse the file and deserialize the data
+        // The deserialized data is then stored in a list of IDataTransformable
+        // The list is then returned
+
+        // For simplicity, each class is deserialized to IDataTransformable
+
+
         string path = "assets/example_data.ftr";
-        IParser parser = new FTRParser();
-        AbstractFactory factory = new BaseFactory();
-        Dictionary<string, List<ISerializable>> instances = Deserializer.Deserialize(path, factory, parser);
-        foreach (KeyValuePair<string, List<ISerializable>> kvp in instances)
+        List<IDataTransformable> data = new List<IDataTransformable>();
+
+        DeserializerFactory deserializerFactory = new DeserializerFactory();
+        IDeserializer? deserializer = deserializerFactory.CreateProduct("ftr");
+        if (deserializer == null)
         {
-            Console.WriteLine(kvp.Key);
-            foreach (ISerializable instance in kvp.Value)
+            throw new System.ArgumentNullException();
+        }
+
+        foreach (string parsed_line in deserializer.ParseFile(path))
+        {
+            IDataTransformable? instance = deserializer.Deserialize<IDataTransformable>(parsed_line);
+            if (instance != null)
             {
-                Console.WriteLine(instance);
+                data.Add(instance);
             }
         }
+        return data;
     }
-    private static void SeralizeExample()
+    private static void SeralizeExample(List<IDataTransformable> data)
     {
-        string path = "assets/example_data.ftr";
-        IParser parser = new FTRParser();
-        AbstractFactory factory = new BaseFactory();
-        Dictionary<string, List<ISerializable>> instances = Deserializer.Deserialize(path, factory, parser);
+        // The data is serialized to a file with the .json format
+        // We use the JsonSerializer to serialize the data
 
-        foreach (KeyValuePair<string, List<ISerializable>> kvp in instances)
+        string path = "assets/example_data.json";
+        ISerializer serializer = new DataTransformation.Json.JsonSerializer();
+
+        // Create an empty file with the .json format
+        File.WriteAllText(path, string.Empty);
+        foreach (IDataTransformable instance in data)
         {
-            string file_path = $"assets/serialized/{kvp.Key}";
-            IFormatter formatter = new JsonFormatter();
-            Serializer.Serialize(file_path, formatter, kvp.Value);
+            string serialized = instance.Serialize(serializer) + ",\n";
+            System.IO.File.AppendAllText(path, serialized);
         }
+
     }
 }

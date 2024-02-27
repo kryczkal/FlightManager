@@ -1,76 +1,46 @@
-using System.Runtime.InteropServices.Marshalling;
-using DataTransformation;
-
-namespace Factory
+namespace Factory;
+/// <summary>
+/// Represents a generic factory that can create instances of a specified type.
+/// </summary>
+/// <typeparam name="T">The type of objects that the factory can create.</typeparam>
+public abstract class Factory<T>
 {
-    /// <summary>
-    /// Represents an abstract factory that creates instances of objects implementing the <see cref="ISerializable"/> interface.
-    /// </summary>
-    public abstract class AbstractFactory
-    {
-        private Dictionary<string, Func<ISerializable>> _instances;
-        protected AbstractFactory()
-        {
-            _instances = new Dictionary<string, Func<ISerializable>>()
-            {
-                {"C", CreateCrew},
-                {"P", CreatePassenger},
-                {"CA", CreateCargo},
-                {"CP", CreateCargoPlane},
-                {"PP", CreatePassengerPlane},
-                {"AI", CreateAirport},
-                {"FL", CreateFlight}
-            };
-        }
-        public ISerializable Create(string type)
-        {
-            if (!_instances.ContainsKey(type)) throw new ArgumentException("Invalid type");
-            return _instances[type]();
-        }
+    private readonly Dictionary<string, Func<T>> _instances = new Dictionary<string, Func<T>>();
 
-        // Create methods for each class
-        public abstract ISerializable CreateAirport();
-        public abstract ISerializable CreateCargo();
-        public abstract ISerializable CreateCargoPlane();
-        public abstract ISerializable CreateCrew();
-        public abstract ISerializable CreatePassenger();
-        public abstract ISerializable CreatePassengerPlane();
-        public abstract ISerializable CreateFlight();
+    /// <summary>
+    /// Registers a creator function for a specific type.
+    /// </summary>
+    /// <param name="type">The type to register.</param>
+    /// <param name="creator">The function that creates instances of the specified type.</param>
+    /// <exception cref="ArgumentException">Thrown if the type is already registered.</exception>
+    protected void Register(string type, Func<T> creator)
+    {
+        if (!_instances.ContainsKey(type))
+        {
+            _instances[type] = creator;
+        }
+        else
+        {
+            throw new ArgumentException($"Type {type} is already registered.");
+        }
     }
 
     /// <summary>
-    /// Represents a base factory that implements the abstract factory pattern.
+    /// Creates an instance of the specified type.
     /// </summary>
-    public class BaseFactory : AbstractFactory
+    /// <param name="type">The type of object to create.</param>
+    /// <returns>An instance of the specified type, or null if the type is not registered.</returns>
+    public T? CreateProduct(string type)
     {
-        public override ISerializable CreateAirport()
+        if (_instances.TryGetValue(type, out var creator))
         {
-            return new Airport();
+            return creator();
         }
-        public override ISerializable CreateCargo()
+        else
         {
-            return new Cargo();
-        }
-        public override ISerializable CreateCargoPlane()
-        {
-            return new CargoPlane();
-        }
-        public override ISerializable CreateCrew()
-        {
-            return new Crew();
-        }
-        public override ISerializable CreatePassenger()
-        {
-            return new Passenger();
-        }
-        public override ISerializable CreatePassengerPlane()
-        {
-            return new PassengerPlane();
-        }
-        public override ISerializable CreateFlight()
-        {
-            return new Flight();
+            return default; // This is null for reference types
         }
     }
-
 }
+
+

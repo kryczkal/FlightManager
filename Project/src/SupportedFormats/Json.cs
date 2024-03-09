@@ -32,6 +32,11 @@ public class JsonSerializer : ISerializer
     {
         return System.Text.Json.JsonSerializer.Serialize<T>(obj);
     }
+
+    public string GetFormat()
+    {
+        return "json";
+    }
 }
 public static class JsonUtils
 {

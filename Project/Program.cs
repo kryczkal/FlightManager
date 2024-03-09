@@ -1,60 +1,91 @@
-﻿using DataTransformation;
+﻿using System.Diagnostics;
+using DataTransformation;
+using NetworkSourceSimulator;
+using System.Threading;
+using projob;
+
+
+public static class SharedInteger
+{
+    private static int _value = 0;
+
+    public static void Set(int value)
+    {
+        Interlocked.Exchange(ref _value, value);
+    }
+    public static void Increment()
+    {
+        Interlocked.Increment(ref _value);
+    }
+
+    public static void Decrement()
+    {
+        Interlocked.Decrement(ref _value);
+    }
+
+    public static int Value
+    {
+        get { return Interlocked.CompareExchange(ref _value, 0, 0); }
+    }
+}
 
 public class Program
 {
     public static void Main(string[] args)
     {
-        List<IDataTransformable> data;
-        data = DeserializeExample();
-        SeralizeExample(data);
+        SharedInteger.Set(0);
+
+        var networkSource = new NetworkSourceSimulator.NetworkSourceSimulator("assets/example_data.ftr", 500, 1000);
+        Thread SimulationThread = new Thread(new ThreadStart(() => SimulateNetworkSource(networkSource)))
+            {
+                IsBackground = true
+            };
+        SimulationThread.Start();
+
+        ConsoleWork(networkSource);
+
+        Environment.Exit(0);
     }
 
-    private static List<IDataTransformable> DeserializeExample()
+    public static void ConsoleWork(NetworkSourceSimulator.NetworkSourceSimulator networkSource)
     {
-        // The data is stored in a file with the .ftr format
-        // Then we use the DeserializerFactory to create a deserializer for the .ftr format
-        // We use the deserializer to parse the file and deserialize the data
-        // The deserialized data is then stored in a list of IDataTransformable
-        // The list is then returned
-
-        // For simplicity, each class is deserialized to IDataTransformable
-
-
-        string path = "assets/example_data.ftr";
-        List<IDataTransformable> data = new List<IDataTransformable>();
-
-        DeserializerFactory deserializerFactory = new DeserializerFactory();
-        IDeserializer? deserializer = deserializerFactory.CreateProduct("ftr");
-        if (deserializer == null)
+        IDeserializer deserializer = new DeserializerFactory().CreateProduct("bin")!;
+        ISerializer serializer = new SerializerFactory().CreateProduct("json");
+        bool running = true;
+        while (running)
         {
-            throw new System.ArgumentNullException();
-        }
-
-        foreach (string parsed_line in deserializer.ParseFile(path))
-        {
-            IDataTransformable? instance = deserializer.Deserialize<IDataTransformable>(parsed_line);
-            if (instance != null)
+            Console.WriteLine("Enter a command: ");
+            string command = Console.ReadLine();
+            switch (command)
             {
-                data.Add(instance);
+                case "exit":
+                    running = false;
+                    break;
+                case "print":
+                {
+                    Console.WriteLine("Printing data...");
+                    BinaryStringAdapter binaryStringAdapter = new BinaryStringAdapter(networkSource.GetMessageAt(SharedInteger.Value).MessageBytes);
+                    IDataTransformable instance = deserializer.Deserialize<IDataTransformable>(binaryStringAdapter.BinAsString());
+
+                    Console.WriteLine(instance.Serialize(serializer));
+
+                    string filePath = "assets/snapshot_" + DateTime.Now.ToString("HH_mm_ss") + "."+ serializer.GetFormat();
+                    DataTransformation.IDataTransformableUtils.SerializeToFile(instance, filePath, serializer);
+                    break;
+                }
             }
         }
-        return data;
     }
-    private static void SeralizeExample(List<IDataTransformable> data)
+
+    private static void SimulateNetworkSource(NetworkSourceSimulator.NetworkSourceSimulator networkSource)
     {
-        // The data is serialized to a file with the .json format
-        // We use the JsonSerializer to serialize the data
+        networkSource.OnNewDataReady += SetLastMessageId;
+        networkSource.Run();
+    }
 
-        string path = "assets/example_data.json";
-        ISerializer serializer = new DataTransformation.Json.JsonSerializer();
-
-        // Create an empty file with the .json format
-        File.WriteAllText(path, string.Empty);
-        foreach (IDataTransformable instance in data)
-        {
-            string serialized = instance.Serialize(serializer) + ",\n";
-            System.IO.File.AppendAllText(path, serialized);
-        }
-
+    private static void SetLastMessageId(object sender, NewDataReadyArgs args)
+    {
+        System.Console.WriteLine("New data is ready!");
+        SharedInteger.Set(args.MessageIndex);
     }
 }

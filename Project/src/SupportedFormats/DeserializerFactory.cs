@@ -8,5 +8,6 @@ public class DeserializerFactory : Factory.Factory<IDeserializer>
     {
         Register("ftr", () => new DataTransformation.Ftr.FtrDeserializer());
         Register("json", () => new DataTransformation.Json.JsonDeserializer());
+        Register("bin", () => new DataTransformation.Binary.BinaryDeserializer());
     }
 }

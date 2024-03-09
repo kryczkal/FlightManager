@@ -3,7 +3,7 @@
 /// </summary>
 namespace DataTransformation
 {
-    public interface IDataTransformable : ISerializable, Ftr.FtrCompliant
+    public interface IDataTransformable : ISerializable, Ftr.FtrCompliant, Binary.BinaryCompliant
     {
     }
     /// <summary>
@@ -30,6 +30,7 @@ namespace DataTransformation
         /// <param name="obj">The object to serialize.</param>
         /// <returns>A string representation of the serialized object.</returns>
         string Serialize<T>(T obj);
+        string GetFormat();
     };
     /// <summary>
     /// Represents an interface for deserializing data and parsing files.

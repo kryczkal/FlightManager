@@ -7,7 +7,9 @@ public class ProductFactory : Factory<IDataTransformable>
     public ProductFactory()
     {
         Register("C", () => new Crew());
+        Register("CR", () => new Crew());
         Register("P", () => new Passenger());
+        Register("PA", () => new Passenger());
         Register("CA", () => new Cargo());
         Register("CP", () => new CargoPlane());
         Register("PP", () => new PassengerPlane());

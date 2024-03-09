@@ -13,4 +13,10 @@
   </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="NetworkSourceSimulator">
+      <HintPath>Includes\NetworkSourceSimulator.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

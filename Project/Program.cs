@@ -1,11 +1,9 @@
-﻿using System.Diagnostics;
-using DataTransformation;
+﻿using DataTransformation;
 using NetworkSourceSimulator;
-using System.Threading;
-using projob;
 
+namespace projob;
 
-public static class SharedInteger
+public static class SharedIndexTracker
 {
     private static int _value = 0;
 
@@ -13,67 +11,70 @@ public static class SharedInteger
     {
         Interlocked.Exchange(ref _value, value);
     }
-    public static void Increment()
-    {
-        Interlocked.Increment(ref _value);
-    }
-
-    public static void Decrement()
-    {
-        Interlocked.Decrement(ref _value);
-    }
-
     public static int Value
     {
         get { return Interlocked.CompareExchange(ref _value, 0, 0); }
     }
 }
 
-public class Program
+public static class Program
 {
     public static void Main(string[] args)
     {
-        SharedInteger.Set(0);
+        SharedIndexTracker.Set(0);
 
-        var networkSource = new NetworkSourceSimulator.NetworkSourceSimulator("assets/example_data.ftr", 500, 1000);
-        Thread SimulationThread = new Thread(new ThreadStart(() => SimulateNetworkSource(networkSource)))
-            {
-                IsBackground = true
-            };
-        SimulationThread.Start();
+        var networkSource = new NetworkSourceSimulator.NetworkSourceSimulator(Settings.LoadPath, Settings.minSimulationOffset, Settings.maxSimulationOffset);
+        Thread simulationThread = new Thread(new ThreadStart(() => SimulateNetworkSource(networkSource)))
+        {
+            IsBackground = true
+        };
+        simulationThread.Start();
 
         ConsoleWork(networkSource);
 
-        Environment.Exit(0);
     }
 
     public static void ConsoleWork(NetworkSourceSimulator.NetworkSourceSimulator networkSource)
     {
-        IDeserializer deserializer = new DeserializerFactory().CreateProduct("bin")!;
-        ISerializer serializer = new SerializerFactory().CreateProduct("json");
+        IDeserializer? deserializer = new DeserializerFactory().CreateProduct("bin");
+        ISerializer? serializer = new SerializerFactory().CreateProduct("json");
+        if (deserializer == null) throw new System.Exception("Deserializer not found");
+        if (serializer == null) throw new System.Exception("Serializer not found");
+
         bool running = true;
         while (running)
         {
             Console.WriteLine("Enter a command: ");
-            string command = Console.ReadLine();
+            string? command = Console.ReadLine();
             switch (command)
             {
                 case "exit":
                     running = false;
                     break;
                 case "print":
-                {
-                    Console.WriteLine("Printing data...");
-                    BinaryStringAdapter binaryStringAdapter = new BinaryStringAdapter(networkSource.GetMessageAt(SharedInteger.Value).MessageBytes);
-                    IDataTransformable instance = deserializer.Deserialize<IDataTransformable>(binaryStringAdapter.BinAsString());
-
-                    Console.WriteLine(instance.Serialize(serializer));
-
-                    string filePath = "assets/snapshot_" + DateTime.Now.ToString("HH_mm_ss") + "."+ serializer.GetFormat();
-                    DataTransformation.IDataTransformableUtils.SerializeToFile(instance, filePath, serializer);
+                    UpdateObjectCentral(networkSource, deserializer);
+                    MakeSnapshot(deserializer, serializer);
                     break;
-                }
             }
+        }
+    }
+
+    private static void MakeSnapshot(IDeserializer deserializer,
+        ISerializer serializer)
+    {
+        Console.WriteLine("Printing data...");
+        string filePath = "assets/snapshot_" + DateTime.Now.ToString("HH_mm_ss") + "."+ serializer.GetFormat();
+        DataTransformation.Utils.SerializeObjListToFile(ObjectCentral.objects, filePath, serializer);
+    }
+
+    private static void UpdateObjectCentral(NetworkSourceSimulator.NetworkSourceSimulator networkSource, IDeserializer deserializer)
+    {
+        for(int i = ObjectCentral.objects.Count(); i < SharedIndexTracker.Value; i++)
+        {
+            IDataTransformable? instance = deserializer.Deserialize<IDataTransformable>(
+                BinaryStringAdapter.BinAsString(networkSource.GetMessageAt(i).MessageBytes));
+            if (instance == null) throw new System.Exception("Instance is null");
+            ObjectCentral.objects.Add(instance);
         }
     }
 
@@ -85,7 +86,7 @@ public class Program
 
     private static void SetLastMessageId(object sender, NewDataReadyArgs args)
     {
-        System.Console.WriteLine("New data is ready!");
-        SharedInteger.Set(args.MessageIndex);
+        System.Console.WriteLine($"New data is ready! {args.MessageIndex}");
+        SharedIndexTracker.Set(args.MessageIndex);
     }
 }

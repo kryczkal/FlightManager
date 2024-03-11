@@ -56,9 +56,9 @@ public class Passenger : IDataTransformable
         Name = System.Text.Encoding.ASCII.GetString(data, offset, NameLength); offset += NameLength;
         Age = BitConverter.ToUInt16(data, offset); offset += sizeof(Int16);
         Phone = System.Text.Encoding.ASCII.GetString(data, offset, 12); offset += 12;
-        UInt16 EmailLength = BitConverter.ToUInt16(data, offset); offset += sizeof(ushort);
+        UInt16 EmailLength = BitConverter.ToUInt16(data, offset); offset += sizeof(UInt16);
         Email = System.Text.Encoding.ASCII.GetString(data, offset, EmailLength); offset += EmailLength;
-        Class = System.Text.Encoding.ASCII.GetString(data, offset, 12); offset += 12;
+        Class = System.Text.Encoding.ASCII.GetString(data, offset, 1); offset += 1;
         Miles = BitConverter.ToUInt64(data, offset); offset += sizeof(UInt64);
     }
 }

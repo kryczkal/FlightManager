@@ -8,9 +8,9 @@ namespace DataTransformation.Binary;
 public interface BinaryCompliant : ISerializable
 {
     /// <summary>
-    /// Converts the object to an array of strings in the Ftr format.
+    /// Converts the object to an array of Bytes.
     /// </summary>
-    /// <returns>An array of strings representing the object in the Ftr format.</returns>
+    /// <returns>An array of Bytes representing the object.</returns>
     byte[] SaveToByteArray();
 
     /// <summary>
@@ -21,7 +21,7 @@ public interface BinaryCompliant : ISerializable
 }
 
 /// <summary>
-/// Deserializer for FTR format.
+/// Deserializer for Binary format.
 /// </summary>
 public class BinaryDeserializer : IDeserializer
 {
@@ -36,8 +36,7 @@ public class BinaryDeserializer : IDeserializer
         // IDataTransformable is used in order to avoid casting instance made from factory to specific type
         // This can be modified to return a specific type
 
-        BinaryStringAdapter binaryStringAdapter = new BinaryStringAdapter(s);
-        byte[] byte_data = binaryStringAdapter.StringAsBin();
+        byte[] byte_data = BinaryStringAdapter.StringAsBin(s);
         string code = System.Text.Encoding.ASCII.GetString(byte_data.Skip(1).Take(2).ToArray());
         byte[] class_vals = byte_data.Skip(7).ToArray();
 

@@ -1,6 +1,6 @@
 namespace DataTransformation;
 
-public static class Utils
+public static class DataTransformationUtils
 {
     public static void SerializeObjToFile(IDataTransformable obj, string filePath, ISerializer serializer)
     {
@@ -15,5 +15,6 @@ public static class Utils
             SerializeObjToFile(obj, filePath, serializer);
         }
     }
+    
 
 }

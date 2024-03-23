@@ -34,7 +34,6 @@ public class BinaryDeserializer : IDeserializer
     public T? Deserialize<T>(string s) where T : IDataTransformable, new()
     {
         byte[] byte_data = BinaryStringAdapter.StringAsBin(s);
-        string code = System.Text.Encoding.ASCII.GetString(byte_data.Skip(1).Take(2).ToArray());
         byte[] class_vals = byte_data.Skip(7).ToArray();
 
         T? instance = new T();

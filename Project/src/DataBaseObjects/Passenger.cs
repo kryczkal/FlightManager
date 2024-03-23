@@ -1,4 +1,6 @@
 using DataTransformation;
+using projob;
+
 namespace Products;
 
 public class Passenger : DataBaseObject
@@ -12,6 +14,14 @@ public class Passenger : DataBaseObject
     public string Email { get; set; }
     public string Class { get; set; }
     public UInt64 Miles { get; set; }
+
+    /*
+     * Central database functions
+     */
+    public override void AddToCentral()
+    {
+        if (!ObjectCentral.Passengers.TryAdd(ID, this)) throw new InvalidOperationException("Passenger with the same ID already exists.");
+    }
 
     /*
      * Format Compliancy : FTR, Binary, JSON

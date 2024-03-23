@@ -1,4 +1,6 @@
 using DataTransformation;
+using projob;
+
 namespace Products;
 public class Airport : DataBaseObject
 {
@@ -12,6 +14,13 @@ public class Airport : DataBaseObject
     public Single AMSL { get; set; }
     public string ISOCountryCode { get; set; }
 
+    /*
+     * Central database functions
+     */
+    public override void AddToCentral()
+    {
+        if (!ObjectCentral.Airports.TryAdd(ID, this)) throw new InvalidOperationException("Airport with the same ID already exists.");
+    }
     /*
      * Format Compliancy : FTR, Binary, JSON
      */

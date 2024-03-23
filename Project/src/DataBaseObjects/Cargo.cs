@@ -1,4 +1,6 @@
 using DataTransformation;
+using projob;
+
 namespace Products;
 
 public class Cargo : DataBaseObject
@@ -9,6 +11,14 @@ public class Cargo : DataBaseObject
     public Single Weight { get; set; }
     public string Code { get; set; }
     public string Description { get; set; }
+
+    /*
+     * Central database functions
+     */
+    public override void AddToCentral()
+    {
+        if (!ObjectCentral.Cargos.TryAdd(ID, this)) throw new InvalidOperationException("Cargo with the same ID already exists.");
+    }
 
     /*
      * Format Compliancy : FTR, Binary, JSON

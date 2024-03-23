@@ -1,4 +1,6 @@
 using DataTransformation;
+using projob;
+
 namespace Products;
 public class PassengerPlane : DataBaseObject
 {
@@ -11,6 +13,14 @@ public class PassengerPlane : DataBaseObject
     public UInt16 FirstClassSize { get; set; }
     public UInt16 BusinessClassSize { get; set; }
     public UInt16 EconomyClassSize { get; set; }
+
+    /*
+     * Central database functions
+     */
+    public override void AddToCentral()
+    {
+        if (!ObjectCentral.PassengerPlanes.TryAdd(ID, this)) throw new InvalidOperationException("PassengerPlane with the same ID already exists.");
+    }
 
     /*
      * Format Compliancy : FTR, Binary, JSON

@@ -1,10 +1,17 @@
 
+using Products;
+
 namespace DataTransformation.Json;
 
 public class JsonDeserializer : IDeserializer
 {
     // This is a setup for the future implementation of the Deserialize method
-    public IDataTransformable? Deserialize<T>(string s) where T : IDataTransformable
+    public T? Deserialize<T>(string s) where T : IDataTransformable, new()
+    {
+        throw new NotImplementedException();
+    }
+
+    public DataBaseObject? Deserialize(string s)
     {
         throw new NotImplementedException();
     }
@@ -37,7 +44,4 @@ public class JsonSerializer : ISerializer
     {
         return "json";
     }
-}
-public static class JsonUtils
-{
 }

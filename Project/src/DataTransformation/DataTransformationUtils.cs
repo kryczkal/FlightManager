@@ -16,5 +16,18 @@ public static class DataTransformationUtils
         }
     }
     
+    public static void SerializeObjToFile<T>(T obj, string filePath, ISerializer serializer) where T : IDataTransformable
+    {
+        // Serialize the data to the file and append a comma and newline
+        string serialized = obj.Serialize(serializer) + ",\n";
+        System.IO.File.AppendAllText(filePath, serialized);
+    }
+    public static void SerializeObjListToFile<T>(List<T> objs, string filePath, ISerializer serializer) where T : IDataTransformable
+    {
+        foreach(T obj in objs)
+        {
+            SerializeObjToFile<T>(obj, filePath, serializer);
+        }
+    }
 
 }

@@ -1,4 +1,6 @@
 using DataTransformation;
+using projob;
+
 namespace Products;
 public class Flight : DataBaseObject
 {
@@ -15,6 +17,14 @@ public class Flight : DataBaseObject
     public UInt64 PlaneID { get; set; }
     public UInt64[] Crew { get; set; } // As their IDs
     public UInt64[] Load { get; set; } // As Cargo IDs
+
+    /*
+     * Central database functions
+     */
+    public override void AddToCentral()
+    {
+        if (!ObjectCentral.Flights.TryAdd(ID, this)) throw new InvalidOperationException("Flight with the same ID already exists.");
+    }
 
     /*
      * Format Compliancy : FTR, Binary, JSON

@@ -4,7 +4,7 @@ namespace DataTransformation;
 /// <summary>
 /// Represents a factory for creating deserializers.
 /// </summary>
-public class DeserializerFactory : Factory.Factory<IDeserializer>
+public class DeserializerFactory : Factory<IDeserializer>
 {
     public DeserializerFactory()
     {

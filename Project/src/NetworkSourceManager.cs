@@ -1,5 +1,7 @@
 using DataTransformation;
+using DataTransformation.Binary;
 using NetworkSourceSimulator;
+using Products;
 
 namespace projob
 {
@@ -69,10 +71,10 @@ namespace projob
         {
             for(int i = _sharedIndexTracker.Value; i < _atomicLastMessageIndex.Value; i++)
             {
-                IDataTransformable? instance = _deserializer!.Deserialize<IDataTransformable>(
+                DataBaseObject? instance = _deserializer!.Deserialize(
                     BinaryStringAdapter.BinAsString(_networkSource.GetMessageAt(i).MessageBytes));
                 if (instance == null) throw new Exception("Instance is null");
-                ObjectCentral.Objects.Add(instance);
+                instance.AddToCentral();
             }
             _sharedIndexTracker.Set(_atomicLastMessageIndex.Value);
         }

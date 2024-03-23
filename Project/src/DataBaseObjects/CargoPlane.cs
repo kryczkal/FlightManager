@@ -1,4 +1,6 @@
 using DataTransformation;
+using projob;
+
 namespace Products;
 public class CargoPlane : DataBaseObject
 {
@@ -9,6 +11,14 @@ public class CargoPlane : DataBaseObject
     public string ISOCountryCode { get; set; }
     public string Model { get; set; }
     public Single MaxLoad { get; set; }
+
+    /*
+     * Central database functions
+     */
+    public override void AddToCentral()
+    {
+        if (!ObjectCentral.CargoPlanes.TryAdd(ID, this)) throw new InvalidOperationException("CargoPlane with the same ID already exists.");
+    }
 
     /*
      * Format Compliancy : FTR, Binary, JSON

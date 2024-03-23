@@ -1,9 +1,26 @@
 using DataTransformation;
+using projob;
 
 namespace Products;
 
-public class DataBaseObject : Serializable, IDataTransformable
+public class DataBaseObject : Serializable, IDataTransformable, IAddableToCentral
 {
+    /*
+     * Properties
+     */
+    public virtual string Type { get; }
+
+    /*
+     * Central database functions
+     */
+    public virtual void AddToCentral()
+    {
+        throw new InvalidOperationException("This method should be overriden in the derived class.");
+    }
+
+    /*
+     * Format compliancy functions
+     */
     public virtual string[] SaveToFtrString()
     {
         throw new InvalidOperationException("This method should be overriden in the derived class.");
@@ -23,6 +40,4 @@ public class DataBaseObject : Serializable, IDataTransformable
     {
         throw new InvalidOperationException("This method should be overriden in the derived class.");
     }
-
-    public virtual string Type { get; }
 }

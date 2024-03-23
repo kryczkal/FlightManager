@@ -5,7 +5,7 @@ namespace DataTransformation.Ftr;
 /// <summary>
 /// Represents a contract for objects that are compliant with the Ftr format.
 /// </summary>
-public interface FtrCompliant : ISerializable
+public interface IFtrCompliant : ISerializable
 {
     /// <summary>
     /// Converts the object to an array of strings in the Ftr format.
@@ -31,19 +31,30 @@ public class FtrDeserializer : IDeserializer
     /// <typeparam name="T">The type of the instance to deserialize.</typeparam>
     /// <param name="s">The input string to deserialize.</param>
     /// <returns>The deserialized instance of type T.</returns>
-    public IDataTransformable? Deserialize<T>(string s) where T : IDataTransformable
+    public T? Deserialize<T>(string s) where T : IDataTransformable, new()
     {
-        // IDataTransformable is used in order to avoid casting instance made from factory to specific type
-        // This can be modified to return a specific type
-
         string[] vals = s.Split(",", StringSplitOptions.TrimEntries);
-        ProductFactory factory = new ProductFactory();
-        IDataTransformable? instance = factory.CreateProduct(vals[0]);
+
+        T instance = new T();
+        instance.LoadFromFtrString(vals.Skip(1).ToArray());
+        return instance;
+    }
+
+    public DataBaseObject? Deserialize(string s)
+    {
+        string[] vals = s.Split(",", StringSplitOptions.TrimEntries);
+        DataBaseObjectFactory factory = new();
+        DataBaseObject? instance = factory.CreateProduct(vals[0]);
         if (instance != null)
         {
             instance.LoadFromFtrString(vals.Skip(1).ToArray());
         }
         return instance;
+    }
+
+    public string GetObjCode(string s)
+    {
+        return s.Split(",", StringSplitOptions.TrimEntries)[0];
     }
     /// <summary>
     /// Parses a file and returns an enumerable collection of strings representing deserializable classes.

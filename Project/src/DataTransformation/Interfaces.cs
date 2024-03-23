@@ -1,10 +1,21 @@
 /// <summary>
+
 /// Represents a namespace for data transformation related functionality. Mainly used for serialization and deserialization of objects.
-/// </summary>
+
+using Products;
+
 namespace DataTransformation
 {
-    public interface IDataTransformable : ISerializable, Ftr.FtrCompliant, Binary.BinaryCompliant
+    public class Serializable : ISerializable
     {
+        public string Serialize(ISerializer serializer)
+        {
+            return serializer.Serialize((dynamic)this);
+        }
+    }
+    public interface IDataTransformable : ISerializable, Ftr.IFtrCompliant, Binary.IBinaryCompliant
+    {
+        public string Type { get; }
     }
     /// <summary>
     /// Represents an interface for objects that can be serialized.
@@ -43,7 +54,15 @@ namespace DataTransformation
         /// <typeparam name="T">The type of object to deserialize.</typeparam>
         /// <param name="s">The string to deserialize.</param>
         /// <returns>The deserialized object.</returns>
-        public IDataTransformable? Deserialize<T>(string s) where T : IDataTransformable;
+        public T? Deserialize<T>(string s) where T : IDataTransformable, new();
+
+        /// <summary>
+        /// This is a specialisation of the Deserialize method that returns a DataBaseObject.
+        /// It is used when the exact type of the object is not known, but it is known that it is derived from a DataBaseObject.
+        /// </summary>
+        /// <param name="s"> The string to deserialize</param>
+        /// <returns>The deserialized object</returns>
+        public DataBaseObject? Deserialize(string s);
 
         /// <summary>
         /// Parses a file and returns a collection of strings.

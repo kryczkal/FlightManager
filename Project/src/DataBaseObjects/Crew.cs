@@ -1,4 +1,6 @@
 using DataTransformation;
+using projob;
+
 namespace Products;
 public class Crew : DataBaseObject
 {
@@ -11,6 +13,14 @@ public class Crew : DataBaseObject
     public string Email { get; set; }
     public UInt16 Practice { get; set; }
     public string Role { get; set; }
+
+    /*
+     * Central database functions
+     */
+    public override void AddToCentral()
+    {
+        if (!ObjectCentral.Crews.TryAdd(ID, this)) throw new InvalidOperationException("Crew with the same ID already exists.");
+    }
 
     /*
      * Format Compliancy : FTR, Binary, JSON

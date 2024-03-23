@@ -10,7 +10,8 @@ public static class Program
                 new NetworkSourceSimulator.NetworkSourceSimulator(
                     Settings.LoadPath,
                     Settings.minSimulationOffset,
-                    Settings.maxSimulationOffset)
+                    Settings.maxSimulationOffset),
+                true
             );
 
         networkSourceManager.RunParallel();
@@ -33,7 +34,6 @@ public static class Program
                     running = false;
                     break;
                 case "print":
-                    networkSourceManager.FlushToObjectCentral();
                     ObjectCentral.MakeSnapshot(serializer);
                     break;
             }

@@ -19,6 +19,7 @@ public static class ObjectCentral
         Console.WriteLine("Printing data...");
         string filePath = "assets/snapshot_" + DateTime.Now.ToString("HH_mm_ss") + "."+ serializer.GetFormat();
         List<IDataTransformable> data;
+
         // Serialize all objects to the file
         data = Airports.Values.ToList<IDataTransformable>();
         DataTransformationUtils.SerializeObjListToFile(data ,filePath, serializer);

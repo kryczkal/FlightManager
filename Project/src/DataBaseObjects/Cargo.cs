@@ -1,17 +1,19 @@
 using DataTransformation;
 namespace Products;
 
-public class Cargo : IDataTransformable
+public class Cargo : DataBaseObject
 {
-    public static readonly string type = "Cargo";
-    public string Type { get { return type; } }
-
+    private static readonly string _type = "Cargo";
+    public virtual string Type => _type;
     public UInt64 ID { get; set; }
     public Single Weight { get; set; }
     public string Code { get; set; }
     public string Description { get; set; }
 
-    public void LoadFromFtrString(string[] data)
+    /*
+     * Format Compliancy : FTR, Binary, JSON
+     */
+    public override void LoadFromFtrString(string[] data)
     {
         ID = UInt64.Parse(data[0]);
         Weight = Single.Parse(data[1]);
@@ -19,7 +21,7 @@ public class Cargo : IDataTransformable
         Description = data[3];
     }
 
-    public string[] SaveToFtrString()
+    public override string[] SaveToFtrString()
     {
         string[] data = new string[5];
         data[0] = Type;
@@ -29,17 +31,13 @@ public class Cargo : IDataTransformable
         data[4] = Description;
         return data;
     }
-    public string Serialize(ISerializer serializer)
-    {
-        return serializer.Serialize<Cargo>(this);
-    }
 
-    public byte[] SaveToByteArray()
+    public override byte[] SaveToByteArray()
     {
         throw new NotImplementedException();
     }
 
-    public void LoadFromByteArray(byte[] data)
+    public override void LoadFromByteArray(byte[] data)
     {
         int offset = 0;
         ID = BitConverter.ToUInt64(data, offset); offset += sizeof(UInt64);

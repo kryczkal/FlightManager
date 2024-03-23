@@ -1,16 +1,19 @@
 using DataTransformation;
 namespace Products;
-public class CargoPlane : IDataTransformable
+public class CargoPlane : DataBaseObject
 {
-    public static readonly string type = "CargoPlane";
-    public string Type { get { return type; } }
+    private static readonly string _type = "CargoPlane";
+    public override string Type => _type;
     public UInt64 ID { get; set; }
     public string Serial { get; set; }
     public string ISOCountryCode { get; set; }
     public string Model { get; set; }
     public Single MaxLoad { get; set; }
 
-    public void LoadFromFtrString(string[] data)
+    /*
+     * Format Compliancy : FTR, Binary, JSON
+     */
+    public override void LoadFromFtrString(string[] data)
     {
         ID = UInt64.Parse(data[0]);
         Serial = data[1];
@@ -19,7 +22,7 @@ public class CargoPlane : IDataTransformable
         MaxLoad = Single.Parse(data[4]);
     }
 
-    public string[] SaveToFtrString()
+    public override string[] SaveToFtrString()
     {
         string[] data = new string[6];
         data[0] = Type;
@@ -31,17 +34,12 @@ public class CargoPlane : IDataTransformable
         return data;
     }
 
-    public string Serialize(ISerializer serializer)
-    {
-        return serializer.Serialize<CargoPlane>(this);
-    }
-
-    public byte[] SaveToByteArray()
+    public override byte[] SaveToByteArray()
     {
         throw new NotImplementedException();
     }
 
-    public void LoadFromByteArray(byte[] data)
+    public override void LoadFromByteArray(byte[] data)
     {
         int offset = 0;
         ID = BitConverter.ToUInt64(data, offset); offset += sizeof(UInt64);

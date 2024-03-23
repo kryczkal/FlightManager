@@ -2,9 +2,9 @@ using DataTransformation;
 using Factory;
 
 namespace Products;
-public class ProductFactory : Factory<IDataTransformable>
+public class DataBaseObjectFactory : Factory<DataBaseObject>
 {
-    public ProductFactory()
+    public DataBaseObjectFactory()
     {
         Register("C", () => new Crew());
         Register("CR", () => new Crew());

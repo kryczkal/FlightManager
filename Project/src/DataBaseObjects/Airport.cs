@@ -1,9 +1,9 @@
 using DataTransformation;
 namespace Products;
-public class Airport : IDataTransformable
+public class Airport : DataBaseObject
 {
-    private static readonly string type = "Airport";
-    public string Type { get { return type; } }
+    private static readonly string _type = "Airport";
+    public override string Type => _type;
     public UInt64 ID { get; set; }
     public string Name { get; set; }
     public string Code { get; set; }
@@ -12,7 +12,10 @@ public class Airport : IDataTransformable
     public Single AMSL { get; set; }
     public string ISOCountryCode { get; set; }
 
-    public void LoadFromFtrString(string[] data)
+    /*
+     * Format Compliancy : FTR, Binary, JSON
+     */
+    public override void LoadFromFtrString(string[] data)
     {
         ID = UInt64.Parse(data[0]);
         Name = data[1];
@@ -23,10 +26,10 @@ public class Airport : IDataTransformable
         ISOCountryCode = data[6];
     }
 
-    public string[] SaveToFtrString()
+    public override string[] SaveToFtrString()
     {
         string[] data = new string[8];
-        data[0] = type;
+        data[0] = _type;
         data[1] = ID.ToString();
         data[2] = Name;
         data[3] = Code;
@@ -36,18 +39,12 @@ public class Airport : IDataTransformable
         data[7] = ISOCountryCode;
         return data;
     }
-
-    public string Serialize(ISerializer serializer)
-    {
-        return serializer.Serialize<Airport>(this);
-    }
-
-    public byte[] SaveToByteArray()
+    public override byte[] SaveToByteArray()
     {
         throw new NotImplementedException();
     }
 
-    public void LoadFromByteArray(byte[] data)
+    public override void LoadFromByteArray(byte[] data)
     {
         int offset = 0;
         ID = BitConverter.ToUInt64(data, offset); offset += sizeof(UInt64);

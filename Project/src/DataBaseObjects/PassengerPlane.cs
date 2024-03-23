@@ -1,9 +1,9 @@
 using DataTransformation;
 namespace Products;
-public class PassengerPlane : IDataTransformable
+public class PassengerPlane : DataBaseObject
 {
-    public static readonly string type = "PassengerPlane";
-    public string Type { get { return type; } }
+    private static readonly string _type = "PassengerPlane";
+    public string Type => _type;
     public UInt64 ID { get; set; }
     public string Serial { get; set; }
     public string ISOCountryCode { get; set; }
@@ -11,7 +11,11 @@ public class PassengerPlane : IDataTransformable
     public UInt16 FirstClassSize { get; set; }
     public UInt16 BusinessClassSize { get; set; }
     public UInt16 EconomyClassSize { get; set; }
-    public void LoadFromFtrString(string[] data)
+
+    /*
+     * Format Compliancy : FTR, Binary, JSON
+     */
+    public override void LoadFromFtrString(string[] data)
     {
         ID = UInt64.Parse(data[0]);
         Serial = data[1];
@@ -22,7 +26,7 @@ public class PassengerPlane : IDataTransformable
         EconomyClassSize = UInt16.Parse(data[6]);
     }
 
-    public string[] SaveToFtrString()
+    public override string[] SaveToFtrString()
     {
         string[] data = new string[8];
         data[0] = Type;
@@ -35,17 +39,12 @@ public class PassengerPlane : IDataTransformable
         data[7] = EconomyClassSize.ToString();
         return data;
     }
-    public string Serialize(ISerializer serializer)
-    {
-        return serializer.Serialize<PassengerPlane>(this);
-    }
-
-    public byte[] SaveToByteArray()
+    public override byte[] SaveToByteArray()
     {
         throw new NotImplementedException();
     }
 
-    public void LoadFromByteArray(byte[] data)
+    public override void LoadFromByteArray(byte[] data)
     {
         int offset = 0;
         ID = BitConverter.ToUInt64(data, offset); offset += sizeof(UInt64);

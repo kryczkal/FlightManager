@@ -1,9 +1,9 @@
 using DataTransformation;
 namespace Products;
-public class Flight : IDataTransformable
+public class Flight : DataBaseObject
 {
-    public static readonly string type = "Flight";
-    public string Type { get { return type; } }
+    private static readonly string _type = "Flight";
+    public string Type => _type;
     public UInt64 ID { get; set; }
     public UInt64 Origin { get; set; } // As Airport ID
     public UInt64 Target { get; set; } // As Airport ID
@@ -12,12 +12,14 @@ public class Flight : IDataTransformable
     public Single Longitude { get; set; }
     public Single Latitude { get; set; }
     public Single AMSL { get; set; }
-
     public UInt64 PlaneID { get; set; }
     public UInt64[] Crew { get; set; } // As their IDs
     public UInt64[] Load { get; set; } // As Cargo IDs
 
-    public void LoadFromFtrString(string[] data)
+    /*
+     * Format Compliancy : FTR, Binary, JSON
+     */
+    public override void LoadFromFtrString(string[] data)
     {
         ID = UInt64.Parse(data[0]);
         Origin = UInt64.Parse(data[1]);
@@ -32,7 +34,7 @@ public class Flight : IDataTransformable
         Load = DataTransformation.Ftr.FtrUtils.ParseArray<UInt64>(data[10]);
     }
 
-    public string[] SaveToFtrString()
+    public override string[] SaveToFtrString()
     {
         string[] data = new string[12];
         data[0] = Type;
@@ -50,17 +52,12 @@ public class Flight : IDataTransformable
         return data;
     }
 
-    public string Serialize(ISerializer serializer)
-    {
-        return serializer.Serialize<Flight>(this);
-    }
-
-    public byte[] SaveToByteArray()
+    public override byte[] SaveToByteArray()
     {
         throw new NotImplementedException();
     }
 
-    public void LoadFromByteArray(byte[] data)
+    public override void LoadFromByteArray(byte[] data)
     {
         int offset = 0;
         ID = BitConverter.ToUInt64(data, offset); offset += sizeof(UInt64);

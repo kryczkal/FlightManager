@@ -32,7 +32,7 @@ public static class GuiManager
     {
         while (true)
         {
-            Thread.Sleep(100);
+            Thread.Sleep(Settings.GuiUpdateIntervalMs);
             UpdateData();
         }
     }

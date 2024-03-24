@@ -1,4 +1,5 @@
-﻿using DataTransformation;
+﻿using System.Numerics;
+using DataTransformation;
 using NetworkSourceSimulator;
 
 namespace projob;
@@ -17,7 +18,6 @@ public static class Program
         networkSourceManager.RunParallel();
         GuiManager.RunParallel();
         ConsoleWork(networkSourceManager);
-
     }
 
     public static void ConsoleWork(NetworkSourceManager networkSourceManager)

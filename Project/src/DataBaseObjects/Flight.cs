@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Numerics;
 using DataTransformation;
 using Mapsui.Projections;
 using projob;
@@ -14,6 +16,10 @@ public class Flight : DataBaseObject
     public DateTime LandingTime { get; set; }
 
     private Single _longitude;
+
+
+
+    private DateTime now = DateTime.UtcNow;
 
     public Single Longitude
     {
@@ -36,7 +42,6 @@ public class Flight : DataBaseObject
             _latitude = value;
         }
     }
-
     private Single PrevLongitude { get; set; }
     private Single PrevLatitude { get; set; }
     public Single AMSL { get; set; }
@@ -51,20 +56,31 @@ public class Flight : DataBaseObject
             Airport originAirport = DataBaseManager.Airports[Origin];
             Airport targetAirport = DataBaseManager.Airports[Target];
 
+            // Convert the origin and target coordinates to quaternions
+            Quaternion origin = QuaternionHelper.LonLatToQuaternion(originAirport.Longitude, originAirport.Latitude);
+            Quaternion target = QuaternionHelper.LonLatToQuaternion(targetAirport.Longitude, targetAirport.Latitude);
+
             // Calculate the flight progress
+            float flightProgress = Progress;
 
-            // Interpolate the current latitude and longitude
-            float currentLatitude = originAirport.Latitude + Progress * (targetAirport.Latitude - originAirport.Latitude);
-            float currentLongitude = originAirport.Longitude + Progress * (targetAirport.Longitude - originAirport.Longitude);
+            // Perform spherical interpolation
+            Quaternion currentPosition = Quaternion.Slerp(origin, target, flightProgress);
 
-            return (currentLongitude, currentLatitude);
+            // Quaternion has the property that q and -q represent the same rotation
+            // If the dot product of the current position and the target is negative, the current position is the opposite of the target
+            if (Quaternion.Dot(currentPosition, target) < 0)
+                currentPosition = -currentPosition;
+            // Convert the interpolated position back to longitude and latitude
+            (float currentLongitude, float currentLatitude) = QuaternionHelper.QuaternionToLonLat(currentPosition);
+          return (currentLongitude, currentLatitude);
         }
     }
+
     public float Progress
     {
         get
         {
-            DateTime currentTime = DateTime.UtcNow;
+            DateTime currentTime = Settings.SimulationTime;
 
             // Calculate the total flight duration in ticks
             long totalFlightDurationTicks = LandingTime.Ticks - TakeoffTime.Ticks;

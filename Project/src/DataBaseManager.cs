@@ -4,7 +4,7 @@ using Products;
 
 namespace projob;
 
-public static class ObjectCentral
+public static class DataBaseManager
 {
     public static ConcurrentDictionary<UInt64, Airport> Airports = new();
     public static ConcurrentDictionary<UInt64, Cargo> Cargos = new();

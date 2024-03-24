@@ -19,7 +19,7 @@ public class Crew : DataBaseObject
      */
     public override void AddToCentral()
     {
-        if (!ObjectCentral.Crews.TryAdd(ID, this)) throw new InvalidOperationException("Crew with the same ID already exists.");
+        if (!DataBaseManager.Crews.TryAdd(ID, this)) throw new InvalidOperationException("Crew with the same ID already exists.");
     }
 
     /*

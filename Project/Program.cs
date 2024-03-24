@@ -7,17 +7,19 @@ public static class Program
     public static void Main(string[] args)
     {
         var networkSourceManager = new NetworkSourceManager(
-                new NetworkSourceSimulator.NetworkSourceSimulator(
-                    Settings.LoadPath,
-                    Settings.minSimulationOffset,
-                    Settings.maxSimulationOffset),
-                true
-            );
+            new NetworkSourceSimulator.NetworkSourceSimulator(
+                Settings.LoadPath,
+                Settings.minSimulationOffset,
+                Settings.maxSimulationOffset),
+            true
+        );
 
         networkSourceManager.RunParallel();
+        GuiManager.RunParallel();
         ConsoleWork(networkSourceManager);
 
     }
+
     public static void ConsoleWork(NetworkSourceManager networkSourceManager)
     {
         ISerializer? serializer = new SerializerFactory().CreateProduct("json");
@@ -34,7 +36,7 @@ public static class Program
                     running = false;
                     break;
                 case "print":
-                    ObjectCentral.MakeSnapshot(serializer);
+                    DataBaseManager.MakeSnapshot(serializer);
                     break;
             }
         }

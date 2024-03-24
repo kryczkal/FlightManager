@@ -23,7 +23,7 @@ public class Flight : DataBaseObject
      */
     public override void AddToCentral()
     {
-        if (!ObjectCentral.Flights.TryAdd(ID, this)) throw new InvalidOperationException("Flight with the same ID already exists.");
+        if (!DataBaseManager.Flights.TryAdd(ID, this)) throw new InvalidOperationException("Flight with the same ID already exists.");
     }
 
     /*

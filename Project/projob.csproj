@@ -14,9 +14,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="FlightTrackerGUI">
+      <HintPath>..\FlightTrackerGUI.dll</HintPath>
+    </Reference>
     <Reference Include="NetworkSourceSimulator">
       <HintPath>Includes\NetworkSourceSimulator.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FlightTrackerGUI" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

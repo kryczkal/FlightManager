@@ -17,7 +17,7 @@ public class Cargo : DataBaseObject
      */
     public override void AddToCentral()
     {
-        if (!ObjectCentral.Cargos.TryAdd(ID, this)) throw new InvalidOperationException("Cargo with the same ID already exists.");
+        if (!DataBaseManager.Cargos.TryAdd(ID, this)) throw new InvalidOperationException("Cargo with the same ID already exists.");
     }
 
     /*

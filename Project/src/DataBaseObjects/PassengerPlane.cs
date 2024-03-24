@@ -19,7 +19,7 @@ public class PassengerPlane : DataBaseObject
      */
     public override void AddToCentral()
     {
-        if (!ObjectCentral.PassengerPlanes.TryAdd(ID, this)) throw new InvalidOperationException("PassengerPlane with the same ID already exists.");
+        if (!DataBaseManager.PassengerPlanes.TryAdd(ID, this)) throw new InvalidOperationException("PassengerPlane with the same ID already exists.");
     }
 
     /*

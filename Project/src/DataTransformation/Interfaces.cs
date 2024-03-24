@@ -1,11 +1,12 @@
-/// <summary>
 
-/// Represents a namespace for data transformation related functionality. Mainly used for serialization and deserialization of objects.
 
 using Products;
 
 namespace DataTransformation
 {
+    /// <summary>
+    /// This addon is used to make the objects serializable out of the box if they implement the IDataTransformable interface.
+    /// </summary>
     public class Serializable : ISerializable
     {
         public string Serialize(ISerializer serializer)

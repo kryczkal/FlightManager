@@ -19,7 +19,7 @@ public class Airport : DataBaseObject
      */
     public override void AddToCentral()
     {
-        if (!ObjectCentral.Airports.TryAdd(ID, this)) throw new InvalidOperationException("Airport with the same ID already exists.");
+        if (!DataBaseManager.Airports.TryAdd(ID, this)) throw new InvalidOperationException("Airport with the same ID already exists.");
     }
     /*
      * Format Compliancy : FTR, Binary, JSON

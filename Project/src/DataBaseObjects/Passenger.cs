@@ -7,20 +7,21 @@ public class Passenger : DataBaseObject
 {
     private static readonly string _type = "Passenger";
     public string Type => _type;
-    public UInt64 ID { get; set; }
+    public ulong ID { get; set; }
     public string Name { get; set; }
-    public UInt64 Age { get; set; }
+    public ulong Age { get; set; }
     public string Phone { get; set; }
     public string Email { get; set; }
     public string Class { get; set; }
-    public UInt64 Miles { get; set; }
+    public ulong Miles { get; set; }
 
     /*
      * Central database functions
      */
     public override void AddToCentral()
     {
-        if (!DataBaseManager.Passengers.TryAdd(ID, this)) throw new InvalidOperationException("Passenger with the same ID already exists.");
+        if (!DataBaseManager.Passengers.TryAdd(ID, this))
+            throw new InvalidOperationException("Passenger with the same ID already exists.");
     }
 
     /*
@@ -28,13 +29,13 @@ public class Passenger : DataBaseObject
      */
     public override void LoadFromFtrString(string[] data)
     {
-        ID = UInt64.Parse(data[0]);
+        ID = ulong.Parse(data[0]);
         Name = data[1];
-        Age = UInt64.Parse(data[2]);
+        Age = ulong.Parse(data[2]);
         Phone = data[3];
         Email = data[4];
         Class = data[5];
-        Miles = UInt64.Parse(data[6]);
+        Miles = ulong.Parse(data[6]);
     }
 
     public override string[] SaveToFtrString()
@@ -50,6 +51,7 @@ public class Passenger : DataBaseObject
         data[7] = Miles.ToString();
         return data;
     }
+
     public override byte[] SaveToByteArray()
     {
         throw new NotImplementedException();
@@ -57,15 +59,24 @@ public class Passenger : DataBaseObject
 
     public override void LoadFromByteArray(byte[] data)
     {
-        int offset = 0;
-        ID = BitConverter.ToUInt64(data, offset); offset += sizeof(UInt64);
-        UInt16 NameLength = BitConverter.ToUInt16(data, offset); offset += sizeof(Int16);
-        Name = System.Text.Encoding.ASCII.GetString(data, offset, NameLength); offset += NameLength;
-        Age = BitConverter.ToUInt16(data, offset); offset += sizeof(Int16);
-        Phone = System.Text.Encoding.ASCII.GetString(data, offset, 12); offset += 12;
-        UInt16 EmailLength = BitConverter.ToUInt16(data, offset); offset += sizeof(UInt16);
-        Email = System.Text.Encoding.ASCII.GetString(data, offset, EmailLength); offset += EmailLength;
-        Class = System.Text.Encoding.ASCII.GetString(data, offset, 1); offset += 1;
-        Miles = BitConverter.ToUInt64(data, offset); offset += sizeof(UInt64);
+        var offset = 0;
+        ID = BitConverter.ToUInt64(data, offset);
+        offset += sizeof(ulong);
+        var NameLength = BitConverter.ToUInt16(data, offset);
+        offset += sizeof(short);
+        Name = System.Text.Encoding.ASCII.GetString(data, offset, NameLength);
+        offset += NameLength;
+        Age = BitConverter.ToUInt16(data, offset);
+        offset += sizeof(short);
+        Phone = System.Text.Encoding.ASCII.GetString(data, offset, 12);
+        offset += 12;
+        var EmailLength = BitConverter.ToUInt16(data, offset);
+        offset += sizeof(ushort);
+        Email = System.Text.Encoding.ASCII.GetString(data, offset, EmailLength);
+        offset += EmailLength;
+        Class = System.Text.Encoding.ASCII.GetString(data, offset, 1);
+        offset += 1;
+        Miles = BitConverter.ToUInt64(data, offset);
+        offset += sizeof(ulong);
     }
 }

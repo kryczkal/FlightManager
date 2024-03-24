@@ -10,14 +10,14 @@ public class Flight : DataBaseObject
 {
     private static readonly string _type = "Flight";
     public string Type => _type;
-    public UInt64 ID { get; set; }
-    public UInt64 Origin { get; set; } // As Airport ID
-    public UInt64 Target { get; set; } // As Airport ID
+    public ulong ID { get; set; }
+    public ulong Origin { get; set; } // As Airport ID
+    public ulong Target { get; set; } // As Airport ID
     public DateTime TakeoffTime { get; set; }
     public DateTime LandingTime { get; set; }
-    private Single _longitude;
+    private float _longitude;
 
-    public Single Longitude
+    public float Longitude
     {
         get => _longitude;
         set
@@ -27,9 +27,9 @@ public class Flight : DataBaseObject
         }
     }
 
-    private Single _latitude;
+    private float _latitude;
 
-    public Single Latitude
+    public float Latitude
     {
         get => _latitude;
         set
@@ -51,27 +51,27 @@ public class Flight : DataBaseObject
         }
     }
 
-    private Single PrevLongitude { get; set; }
-    private Single PrevLatitude { get; set; }
-    public Single AMSL { get; set; }
-    public UInt64 PlaneID { get; set; }
-    public UInt64[] Crew { get; set; } // As their IDs
-    public UInt64[] Load { get; set; } // As Cargo IDs
+    private float PrevLongitude { get; set; }
+    private float PrevLatitude { get; set; }
+    public float AMSL { get; set; }
+    public ulong PlaneID { get; set; }
+    public ulong[] Crew { get; set; } // As their IDs
+    public ulong[] Load { get; set; } // As Cargo IDs
 
     public float Progress
     {
         get
         {
-            DateTime currentTime = Settings.SimulationTime;
+            var currentTime = Settings.SimulationTime;
 
             // Calculate the total flight duration in ticks
-            long totalFlightDurationTicks = LandingTime.Ticks - TakeoffTime.Ticks;
+            var totalFlightDurationTicks = LandingTime.Ticks - TakeoffTime.Ticks;
 
             // Calculate the elapsed time since takeoff in ticks
-            long elapsedTimeTicks = currentTime.Ticks - TakeoffTime.Ticks;
+            var elapsedTimeTicks = currentTime.Ticks - TakeoffTime.Ticks;
 
             // Calculate the flight progress as a float between 0 and 1
-            float flightProgress = (float)elapsedTimeTicks / totalFlightDurationTicks;
+            var flightProgress = (float)elapsedTimeTicks / totalFlightDurationTicks;
 
             // Ensure the flight progress is within the range [0, 1]
             flightProgress = Math.Max(0, flightProgress);
@@ -90,11 +90,11 @@ public class Flight : DataBaseObject
             var currentPositionXY = SphericalMercator.FromLonLat(Longitude, Latitude);
 
             // Calculate the difference in x and y coordinates
-            double deltaX = currentPositionXY.x - previousPositionXY.x;
-            double deltaY = currentPositionXY.y - previousPositionXY.y;
+            var deltaX = currentPositionXY.x - previousPositionXY.x;
+            var deltaY = currentPositionXY.y - previousPositionXY.y;
 
             // Calculate the rotation in radians relative to the vector (0, 1)
-            double rotation = Math.Atan2(deltaX, deltaY);
+            var rotation = Math.Atan2(deltaX, deltaY);
             return rotation;
         }
     }
@@ -105,25 +105,25 @@ public class Flight : DataBaseObject
     public (float Longitude, float Latitude) CalcCurrentPositionLonLat()
     {
         // Get the origin and target airports from the DataBaseManager
-        Airport originAirport = DataBaseManager.Airports[Origin];
-        Airport targetAirport = DataBaseManager.Airports[Target];
+        var originAirport = DataBaseManager.Airports[Origin];
+        var targetAirport = DataBaseManager.Airports[Target];
 
         // Convert the origin and target coordinates to quaternions
-        Quaternion origin = QuaternionHelper.LonLatToQuaternion(originAirport.Longitude, originAirport.Latitude);
-        Quaternion target = QuaternionHelper.LonLatToQuaternion(targetAirport.Longitude, targetAirport.Latitude);
+        var origin = QuaternionHelper.LonLatToQuaternion(originAirport.Longitude, originAirport.Latitude);
+        var target = QuaternionHelper.LonLatToQuaternion(targetAirport.Longitude, targetAirport.Latitude);
 
         // Calculate the flight progress
-        float flightProgress = Progress;
+        var flightProgress = Progress;
 
         // Perform spherical interpolation
-        Quaternion currentPosition = Quaternion.Slerp(origin, target, flightProgress);
+        var currentPosition = Quaternion.Slerp(origin, target, flightProgress);
 
         // Quaternion has the property that q and -q represent the same rotation
         // If the dot product of the current position and the target is negative, the current position is the opposite of the target
         if (Quaternion.Dot(currentPosition, target) < 0)
             currentPosition = -currentPosition;
         // Convert the interpolated position back to longitude and latitude
-        (float currentLongitude, float currentLatitude) = QuaternionHelper.QuaternionToLonLat(currentPosition);
+        (var currentLongitude, var currentLatitude) = QuaternionHelper.QuaternionToLonLat(currentPosition);
         return (currentLongitude, currentLatitude);
     }
 
@@ -146,20 +146,20 @@ public class Flight : DataBaseObject
      */
     public override void LoadFromFtrString(string[] data)
     {
-        ID = UInt64.Parse(data[0]);
-        Origin = UInt64.Parse(data[1]);
-        Target = UInt64.Parse(data[2]);
+        ID = ulong.Parse(data[0]);
+        Origin = ulong.Parse(data[1]);
+        Target = ulong.Parse(data[2]);
 
         // The ftr file contains only the hours and minutes of the day so we set the date to today
         TakeoffTime = DateTime.Today.Add(TimeSpan.Parse(data[3]));
         LandingTime = DateTime.Today.Add(TimeSpan.Parse(data[4]));
 
-        Longitude = Single.Parse(data[5]);
-        Latitude = Single.Parse(data[6]);
-        AMSL = Single.Parse(data[7]);
-        PlaneID = UInt64.Parse(data[8]);
-        Crew = DataTransformation.Ftr.FtrUtils.ParseArray<UInt64>(data[9]);
-        Load = DataTransformation.Ftr.FtrUtils.ParseArray<UInt64>(data[10]);
+        Longitude = float.Parse(data[5]);
+        Latitude = float.Parse(data[6]);
+        AMSL = float.Parse(data[7]);
+        PlaneID = ulong.Parse(data[8]);
+        Crew = DataTransformation.Ftr.FtrUtils.ParseArray<ulong>(data[9]);
+        Load = DataTransformation.Ftr.FtrUtils.ParseArray<ulong>(data[10]);
     }
 
     public override string[] SaveToFtrString()
@@ -175,8 +175,8 @@ public class Flight : DataBaseObject
         data[7] = Latitude.ToString();
         data[8] = AMSL.ToString();
         data[9] = PlaneID.ToString();
-        data[10] = DataTransformation.Ftr.FtrUtils.FormatArray<UInt64>(Crew);
-        data[11] = DataTransformation.Ftr.FtrUtils.FormatArray<UInt64>(Load);
+        data[10] = DataTransformation.Ftr.FtrUtils.FormatArray<ulong>(Crew);
+        data[11] = DataTransformation.Ftr.FtrUtils.FormatArray<ulong>(Load);
         return data;
     }
 
@@ -187,43 +187,43 @@ public class Flight : DataBaseObject
 
     public override void LoadFromByteArray(byte[] data)
     {
-        int offset = 0;
+        var offset = 0;
         ID = BitConverter.ToUInt64(data, offset);
-        offset += sizeof(UInt64);
+        offset += sizeof(ulong);
         Origin = BitConverter.ToUInt64(data, offset);
-        offset += sizeof(UInt64);
+        offset += sizeof(ulong);
         Target = BitConverter.ToUInt64(data, offset);
-        offset += sizeof(UInt64);
+        offset += sizeof(ulong);
 
         // TakeoffTime taken as number of ms since Epoch(UTC) and parsed to DateTime
         TakeoffTime = DateTimeOffset.FromUnixTimeMilliseconds(BitConverter.ToInt64(data, offset)).UtcDateTime;
-        offset += sizeof(UInt64);
+        offset += sizeof(ulong);
         // LandingTime taken as number of ms since Epoch(UTC) and parsed to DateTime
         LandingTime = DateTimeOffset.FromUnixTimeMilliseconds(BitConverter.ToInt64(data, offset)).UtcDateTime;
-        offset += sizeof(UInt64);
+        offset += sizeof(ulong);
 
         // Since there is a bug in the NetworkSourceManager, there can be flights where the TakeoffTime is after the LandingTime
         // In this case we add a day to the LandingTime
         if (TakeoffTime > LandingTime) LandingTime = LandingTime.AddDays(1);
 
         PlaneID = BitConverter.ToUInt64(data, offset);
-        offset += sizeof(UInt64);
-        UInt16 CrewLength = BitConverter.ToUInt16(data, offset);
-        offset += sizeof(UInt16);
-        Crew = new UInt64[CrewLength];
-        for (int i = 0; i < CrewLength; i++)
+        offset += sizeof(ulong);
+        var CrewLength = BitConverter.ToUInt16(data, offset);
+        offset += sizeof(ushort);
+        Crew = new ulong[CrewLength];
+        for (var i = 0; i < CrewLength; i++)
         {
             Crew[i] = BitConverter.ToUInt64(data, offset);
-            offset += sizeof(UInt64);
+            offset += sizeof(ulong);
         }
 
-        UInt16 LoadLength = BitConverter.ToUInt16(data, offset);
-        offset += sizeof(UInt16);
-        Load = new UInt64[LoadLength];
-        for (int i = 0; i < LoadLength; i++)
+        var LoadLength = BitConverter.ToUInt16(data, offset);
+        offset += sizeof(ushort);
+        Load = new ulong[LoadLength];
+        for (var i = 0; i < LoadLength; i++)
         {
             Load[i] = BitConverter.ToUInt64(data, offset);
-            offset += sizeof(UInt64);
+            offset += sizeof(ulong);
         }
 
         // Longitude, Latitude and AMSL are not used in this method

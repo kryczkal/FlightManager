@@ -1,4 +1,3 @@
-
 using Products;
 
 namespace DataTransformation.Json;
@@ -18,17 +17,13 @@ public class JsonDeserializer : IDeserializer
 
     public IEnumerable<string> ParseFile(string filePath)
     {
-        using (StreamReader reader = new StreamReader(filePath))
+        using (var reader = new StreamReader(filePath))
         {
-            string? line = reader.ReadLine();
+            var line = reader.ReadLine();
             if (line != null)
-            {
                 yield return line;
-            }
             else
-            {
                 yield break;
-            }
         }
     }
 }

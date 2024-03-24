@@ -2,6 +2,7 @@ using DataTransformation;
 using Factory;
 
 namespace Products;
+
 public class DataBaseObjectFactory : Factory<DataBaseObject>
 {
     public DataBaseObjectFactory()

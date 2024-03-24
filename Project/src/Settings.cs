@@ -11,16 +11,17 @@ public static class Settings
 
     public static DateTime SimulationStartTime { get; private set; } = DateTime.Now;
     private static DateTime _simulationTime = SimulationStartTime;
+
     public static DateTime SimulationTime
-{
-    get
     {
-        if(IsSimulationRealTime) return DateTime.Now;
+        get
+        {
+            if (IsSimulationRealTime) return DateTime.Now;
 
-        TimeSpan realTimeElapsed = DateTime.Now - SimulationStartTime;
-        TimeSpan simulatedTimeElapsed = TimeSpan.FromMilliseconds(realTimeElapsed.TotalMilliseconds * SimulationSpeed);
+            var realTimeElapsed = DateTime.Now - SimulationStartTime;
+            var simulatedTimeElapsed = TimeSpan.FromMilliseconds(realTimeElapsed.TotalMilliseconds * SimulationSpeed);
 
-        return SimulationStartTime + simulatedTimeElapsed;
+            return SimulationStartTime + simulatedTimeElapsed;
+        }
     }
-}
 }

@@ -2,16 +2,17 @@ using DataTransformation;
 using projob;
 
 namespace Products;
+
 public class Airport : DataBaseObject
 {
     private static readonly string _type = "Airport";
     public override string Type => _type;
-    public UInt64 ID { get; set; }
+    public ulong ID { get; set; }
     public string Name { get; set; }
     public string Code { get; set; }
-    public Single Longitude { get; set; }
-    public Single Latitude { get; set; }
-    public Single AMSL { get; set; }
+    public float Longitude { get; set; }
+    public float Latitude { get; set; }
+    public float AMSL { get; set; }
     public string ISOCountryCode { get; set; }
 
     /*
@@ -19,19 +20,21 @@ public class Airport : DataBaseObject
      */
     public override void AddToCentral()
     {
-        if (!DataBaseManager.Airports.TryAdd(ID, this)) throw new InvalidOperationException("Airport with the same ID already exists.");
+        if (!DataBaseManager.Airports.TryAdd(ID, this))
+            throw new InvalidOperationException("Airport with the same ID already exists.");
     }
+
     /*
      * Format Compliancy : FTR, Binary, JSON
      */
     public override void LoadFromFtrString(string[] data)
     {
-        ID = UInt64.Parse(data[0]);
+        ID = ulong.Parse(data[0]);
         Name = data[1];
         Code = data[2];
-        Longitude = Single.Parse(data[3]);
-        Latitude = Single.Parse(data[4]);
-        AMSL = Single.Parse(data[5]);
+        Longitude = float.Parse(data[3]);
+        Latitude = float.Parse(data[4]);
+        AMSL = float.Parse(data[5]);
         ISOCountryCode = data[6];
     }
 
@@ -48,6 +51,7 @@ public class Airport : DataBaseObject
         data[7] = ISOCountryCode;
         return data;
     }
+
     public override byte[] SaveToByteArray()
     {
         throw new NotImplementedException();
@@ -55,14 +59,22 @@ public class Airport : DataBaseObject
 
     public override void LoadFromByteArray(byte[] data)
     {
-        int offset = 0;
-        ID = BitConverter.ToUInt64(data, offset); offset += sizeof(UInt64);
-        UInt16 nameLength = BitConverter.ToUInt16(data, offset); offset += sizeof(UInt16);
-        Name = System.Text.Encoding.ASCII.GetString(data, offset, nameLength); offset += nameLength;
-        Code = System.Text.Encoding.ASCII.GetString(data, offset, 3); offset += 3;
-        Longitude = BitConverter.ToSingle(data, offset); offset += sizeof(Single);
-        Latitude = BitConverter.ToSingle(data, offset); offset += sizeof(Single);
-        AMSL = BitConverter.ToSingle(data, offset); offset += sizeof(Single);
-        ISOCountryCode = System.Text.Encoding.ASCII.GetString(data, offset, 3); offset += 3;
+        var offset = 0;
+        ID = BitConverter.ToUInt64(data, offset);
+        offset += sizeof(ulong);
+        var nameLength = BitConverter.ToUInt16(data, offset);
+        offset += sizeof(ushort);
+        Name = System.Text.Encoding.ASCII.GetString(data, offset, nameLength);
+        offset += nameLength;
+        Code = System.Text.Encoding.ASCII.GetString(data, offset, 3);
+        offset += 3;
+        Longitude = BitConverter.ToSingle(data, offset);
+        offset += sizeof(float);
+        Latitude = BitConverter.ToSingle(data, offset);
+        offset += sizeof(float);
+        AMSL = BitConverter.ToSingle(data, offset);
+        offset += sizeof(float);
+        ISOCountryCode = System.Text.Encoding.ASCII.GetString(data, offset, 3);
+        offset += 3;
     }
 }

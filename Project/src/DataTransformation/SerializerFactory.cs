@@ -1,13 +1,14 @@
 using Factory;
 
 namespace DataTransformation;
+
 /// <summary>
 /// Represents a factory for creating serializers.
 /// </summary>
-public class SerializerFactory : Factory.Factory<ISerializer>
+public class SerializerFactory : Factory<ISerializer>
 {
     public SerializerFactory()
     {
-        Register("json", () => new DataTransformation.Json.JsonSerializer());
+        Register("json", () => new Json.JsonSerializer());
     }
 }

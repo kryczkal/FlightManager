@@ -2,6 +2,7 @@ using System.ComponentModel;
 using Products;
 
 namespace DataTransformation.Ftr;
+
 /// <summary>
 /// Represents a contract for objects that are compliant with the Ftr format.
 /// </summary>
@@ -35,7 +36,7 @@ public class FtrDeserializer : IDeserializer
     {
         string[] vals = s.Split(",", StringSplitOptions.TrimEntries);
 
-        T instance = new T();
+        var instance = new T();
         instance.LoadFromFtrString(vals.Skip(1).ToArray());
         return instance;
     }
@@ -44,11 +45,8 @@ public class FtrDeserializer : IDeserializer
     {
         string[] vals = s.Split(",", StringSplitOptions.TrimEntries);
         DataBaseObjectFactory factory = new();
-        DataBaseObject? instance = factory.CreateProduct(vals[0]);
-        if (instance != null)
-        {
-            instance.LoadFromFtrString(vals.Skip(1).ToArray());
-        }
+        var instance = factory.CreateProduct(vals[0]);
+        if (instance != null) instance.LoadFromFtrString(vals.Skip(1).ToArray());
         return instance;
     }
 
@@ -56,6 +54,7 @@ public class FtrDeserializer : IDeserializer
     {
         return s.Split(",", StringSplitOptions.TrimEntries)[0];
     }
+
     /// <summary>
     /// Parses a file and returns an enumerable collection of strings representing deserializable classes.
     /// </summary>
@@ -63,14 +62,12 @@ public class FtrDeserializer : IDeserializer
     /// <returns>An enumerable collection of strings representing deserializable classes.</returns>
     public IEnumerable<string> ParseFile(string filePath)
     {
-        using StreamReader reader = new StreamReader(filePath);
+        using var reader = new StreamReader(filePath);
         string? line;
-        while ((line = reader.ReadLine()) != null)
-        {
-            yield return line;
-        }
+        while ((line = reader.ReadLine()) != null) yield return line;
     }
 }
+
 /// <summary>
 /// Utility class for working with FTR format.
 /// </summary>
@@ -84,7 +81,7 @@ public static class FtrUtils
     /// <returns>An array of the specified type.</returns>
     public static T[] ParseArray<T>(string line)
     {
-        TypeConverter converter = TypeDescriptor.GetConverter(typeof(T));
+        var converter = TypeDescriptor.GetConverter(typeof(T));
         line = line.Substring(1, line.Length - 2);
         string[] values = line.Split(';');
         return Array.ConvertAll(values, s => (T)converter.ConvertFromString(s)!)!;
@@ -99,14 +96,12 @@ public static class FtrUtils
     public static string FormatArray<T>(T[] values)
     {
         string?[] data = new string[values.Length];
-        for (int i = 0; i < values.Length; i++)
+        for (var i = 0; i < values.Length; i++)
         {
             data[i] = values[i]!.ToString();
-            if (data[i] == null)
-            {
-                throw new System.ArgumentNullException();
-            }
+            if (data[i] == null) throw new ArgumentNullException();
         }
+
         return "[" + string.Join(";", data) + "]";
     }
 }

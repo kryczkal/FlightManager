@@ -2,6 +2,7 @@ using System.Text;
 using Products;
 
 namespace DataTransformation.Binary;
+
 /// <summary>
 /// Represents a contract for objects that are compliant with the Byte format.
 /// </summary>
@@ -33,32 +34,31 @@ public class BinaryDeserializer : IDeserializer
     /// <returns>The deserialized instance of type T.</returns>
     public T? Deserialize<T>(string s) where T : IDataTransformable, new()
     {
-        byte[] byte_data = BinaryStringAdapter.StringAsBin(s);
-        byte[] class_vals = byte_data.Skip(7).ToArray();
+        var byte_data = BinaryStringAdapter.StringAsBin(s);
+        var class_vals = byte_data.Skip(7).ToArray();
 
-        T? instance = new T();
+        var instance = new T();
         instance.LoadFromByteArray(class_vals);
         return instance;
     }
+
     public DataBaseObject? Deserialize(string s)
     {
-        byte[] byte_data = BinaryStringAdapter.StringAsBin(s);
-        string code = System.Text.Encoding.ASCII.GetString(byte_data.Skip(1).Take(2).ToArray());
-        byte[] class_vals = byte_data.Skip(7).ToArray();
+        var byte_data = BinaryStringAdapter.StringAsBin(s);
+        var code = Encoding.ASCII.GetString(byte_data.Skip(1).Take(2).ToArray());
+        var class_vals = byte_data.Skip(7).ToArray();
 
-        DataBaseObjectFactory factory = new DataBaseObjectFactory();
-        DataBaseObject? instance = factory.CreateProduct(code);
-        if (instance != null)
-        {
-            instance.LoadFromByteArray(class_vals);
-        }
+        var factory = new DataBaseObjectFactory();
+        var instance = factory.CreateProduct(code);
+        if (instance != null) instance.LoadFromByteArray(class_vals);
         return instance;
     }
 
     public string GetObjCode(byte[] byte_data)
     {
-        return System.Text.Encoding.ASCII.GetString(byte_data.Skip(1).Take(2).ToArray());
+        return Encoding.ASCII.GetString(byte_data.Skip(1).Take(2).ToArray());
     }
+
     /// <summary>
     /// Parses a file and returns an enumerable collection of strings representing deserializable classes.
     /// </summary>
@@ -66,12 +66,9 @@ public class BinaryDeserializer : IDeserializer
     /// <returns>An enumerable collection of strings representing deserializable classes.</returns>
     public IEnumerable<string> ParseFile(string filePath)
     {
-        using StreamReader reader = new StreamReader(filePath);
+        using var reader = new StreamReader(filePath);
         string? line;
-        while ((line = reader.ReadLine()) != null)
-        {
-            yield return line;
-        }
+        while ((line = reader.ReadLine()) != null) yield return line;
     }
 }
 
@@ -83,18 +80,16 @@ public static class BinaryStringAdapter
 {
     public static string BinAsString(byte[] byteArray)
     {
-        StringBuilder binaryString = new StringBuilder();
-        foreach (byte b in byteArray)
-        {
-            binaryString.Append(Convert.ToString(b, 2).PadLeft(8, '0'));
-        }
+        var binaryString = new StringBuilder();
+        foreach (var b in byteArray) binaryString.Append(Convert.ToString(b, 2).PadLeft(8, '0'));
         return binaryString.ToString();
     }
 
     public static byte[] StringAsBin(string str)
     {
         return Enumerable.Range(0, str.Length / 8)
-                                    .Select(i => Convert.ToByte(str.Substring(i * 8, 8), 2))
-                                    .ToArray();;
+            .Select(i => Convert.ToByte(str.Substring(i * 8, 8), 2))
+            .ToArray();
+        ;
     }
 }

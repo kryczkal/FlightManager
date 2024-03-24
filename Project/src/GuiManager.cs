@@ -11,11 +11,11 @@ public static class GuiManager
 
     public static void RunParallel()
     {
-        Thread simulationThread = new Thread(() => RunGui())
+        var simulationThread = new Thread(() => RunGui())
         {
             IsBackground = true
         };
-        Thread updateThread = new Thread(() => PeriodicUpdate())
+        var updateThread = new Thread(() => PeriodicUpdate())
         {
             IsBackground = true
         };
@@ -39,10 +39,7 @@ public static class GuiManager
 
     public static void UpdateData()
     {
-        foreach (Flight flight in DataBaseManager.Flights.Values)
-        {
-            flight.UpdatePosition();
-        }
+        foreach (var flight in DataBaseManager.Flights.Values) flight.UpdatePosition();
 
         _flightsGuiData.UpdateFlights(DataBaseManager.Flights.Values.ToList());
         Runner.UpdateGUI(_flightsGuiData);
@@ -52,22 +49,39 @@ public static class GuiManager
     public class DatabaseFlightGUIData : FlightsGUIData
     {
         private List<Flight> DataBaseFlights = new();
+
         public DatabaseFlightGUIData(List<Flight> _flights)
         {
             DataBaseFlights = _flights;
         }
+
         public DatabaseFlightGUIData()
         {
         }
 
-        public void UpdateFlights(List<Flight> _flights) => DataBaseFlights = _flights;
+        public void UpdateFlights(List<Flight> _flights)
+        {
+            DataBaseFlights = _flights;
+        }
 
-        public override int GetFlightsCount() => DataBaseFlights.Count;
+        public override int GetFlightsCount()
+        {
+            return DataBaseFlights.Count;
+        }
 
-        public override ulong GetID(int index) => DataBaseFlights[index].ID;
+        public override ulong GetID(int index)
+        {
+            return DataBaseFlights[index].ID;
+        }
 
-        public override WorldPosition GetPosition(int index) => DataBaseFlights[index].WorldPosition;
+        public override WorldPosition GetPosition(int index)
+        {
+            return DataBaseFlights[index].WorldPosition;
+        }
 
-        public override double GetRotation(int index) => DataBaseFlights[index].RotationRadians;
+        public override double GetRotation(int index)
+        {
+            return DataBaseFlights[index].RotationRadians;
+        }
     }
 }

@@ -7,8 +7,8 @@ public class Cargo : DataBaseObject
 {
     private static readonly string _type = "Cargo";
     public virtual string Type => _type;
-    public UInt64 ID { get; set; }
-    public Single Weight { get; set; }
+    public ulong ID { get; set; }
+    public float Weight { get; set; }
     public string Code { get; set; }
     public string Description { get; set; }
 
@@ -17,7 +17,8 @@ public class Cargo : DataBaseObject
      */
     public override void AddToCentral()
     {
-        if (!DataBaseManager.Cargos.TryAdd(ID, this)) throw new InvalidOperationException("Cargo with the same ID already exists.");
+        if (!DataBaseManager.Cargos.TryAdd(ID, this))
+            throw new InvalidOperationException("Cargo with the same ID already exists.");
     }
 
     /*
@@ -25,8 +26,8 @@ public class Cargo : DataBaseObject
      */
     public override void LoadFromFtrString(string[] data)
     {
-        ID = UInt64.Parse(data[0]);
-        Weight = Single.Parse(data[1]);
+        ID = ulong.Parse(data[0]);
+        Weight = float.Parse(data[1]);
         Code = data[2];
         Description = data[3];
     }
@@ -49,11 +50,16 @@ public class Cargo : DataBaseObject
 
     public override void LoadFromByteArray(byte[] data)
     {
-        int offset = 0;
-        ID = BitConverter.ToUInt64(data, offset); offset += sizeof(UInt64);
-        Weight = BitConverter.ToSingle(data, offset); offset += sizeof(Single);
-        Code = System.Text.Encoding.ASCII.GetString(data, offset, 6); offset += 6;
-        UInt16 DescriptionLength = BitConverter.ToUInt16(data, offset); offset += sizeof(UInt16);
-        Description = System.Text.Encoding.ASCII.GetString(data, offset, DescriptionLength); offset += DescriptionLength;
+        var offset = 0;
+        ID = BitConverter.ToUInt64(data, offset);
+        offset += sizeof(ulong);
+        Weight = BitConverter.ToSingle(data, offset);
+        offset += sizeof(float);
+        Code = System.Text.Encoding.ASCII.GetString(data, offset, 6);
+        offset += 6;
+        var DescriptionLength = BitConverter.ToUInt16(data, offset);
+        offset += sizeof(ushort);
+        Description = System.Text.Encoding.ASCII.GetString(data, offset, DescriptionLength);
+        offset += DescriptionLength;
     }
 }

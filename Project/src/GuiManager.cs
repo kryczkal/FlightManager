@@ -7,7 +7,7 @@ namespace projob;
 
 public static class GuiManager
 {
-    private static FlightsGUIData _flightsGUIData = new();
+    private static DatabaseFlightGUIData _flightsGuiData = new();
 
     public static void RunParallel()
     {
@@ -22,11 +22,12 @@ public static class GuiManager
         simulationThread.Start();
         updateThread.Start();
     }
+
     private static void RunGui()
     {
-        //networkSource.OnNewDataReady += SetLastMessageId;
         Runner.Run(); // Run the GUI from the FlightTrackerGUI namespace
     }
+
     private static void PeriodicUpdate()
     {
         while (true)
@@ -38,43 +39,35 @@ public static class GuiManager
 
     public static void UpdateData()
     {
-        List<FlightGUI> data = new();
         foreach (Flight flight in DataBaseManager.Flights.Values)
         {
-            if(flight.Progress == 0) continue;
-
-            FlightGUI flight_data;
-            if (Math.Abs(flight.Progress - 1) < 1e-10)
-            {
-                // Flight finished
-
-                flight.UpdatePosition();
-                flight_data = new FlightGUI(){
-                    WorldPosition = new WorldPosition(
-                        DataBaseManager.Airports[flight.Target].Latitude,
-                        DataBaseManager.Airports[flight.Target].Longitude
-                        ),
-                    ID = flight.ID,
-                    MapCoordRotation = 0,
-                };
-
-                // Remove the flight from the database
-                DataBaseManager.Flights.TryRemove(flight.ID, out _);
-            }
-            else
-            {
-                flight.UpdatePosition();
-                flight_data = new FlightGUI()
-                {
-                    WorldPosition = new WorldPosition(flight.Latitude, flight.Longitude),
-                    ID = flight.ID,
-                    MapCoordRotation = Math.Abs(flight.Progress - 1) < 1e-9 ? 0 : flight.RotationRadians,
-                };
-
-            }
-            data.Add(flight_data);
+            flight.UpdatePosition();
         }
-        _flightsGUIData.UpdateFlights(data);
-        Runner.UpdateGUI(_flightsGUIData);
+
+        _flightsGuiData.UpdateFlights(DataBaseManager.Flights.Values.ToList());
+        Runner.UpdateGUI(_flightsGuiData);
+    }
+
+    // An adapter class to provide the data to the GUI
+    public class DatabaseFlightGUIData : FlightsGUIData
+    {
+        private List<Flight> DataBaseFlights = new();
+        public DatabaseFlightGUIData(List<Flight> _flights)
+        {
+            DataBaseFlights = _flights;
+        }
+        public DatabaseFlightGUIData()
+        {
+        }
+
+        public void UpdateFlights(List<Flight> _flights) => DataBaseFlights = _flights;
+
+        public override int GetFlightsCount() => DataBaseFlights.Count;
+
+        public override ulong GetID(int index) => DataBaseFlights[index].ID;
+
+        public override WorldPosition GetPosition(int index) => DataBaseFlights[index].WorldPosition;
+
+        public override double GetRotation(int index) => DataBaseFlights[index].RotationRadians;
     }
 }

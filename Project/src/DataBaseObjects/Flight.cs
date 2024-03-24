@@ -5,6 +5,7 @@ using Mapsui.Projections;
 using projob;
 
 namespace Products;
+
 public class Flight : DataBaseObject
 {
     private static readonly string _type = "Flight";
@@ -14,12 +15,7 @@ public class Flight : DataBaseObject
     public UInt64 Target { get; set; } // As Airport ID
     public DateTime TakeoffTime { get; set; }
     public DateTime LandingTime { get; set; }
-
     private Single _longitude;
-
-
-
-    private DateTime now = DateTime.UtcNow;
 
     public Single Longitude
     {
@@ -42,39 +38,25 @@ public class Flight : DataBaseObject
             _latitude = value;
         }
     }
+
+    private WorldPosition _worldPosition;
+
+    public WorldPosition WorldPosition
+    {
+        get
+        {
+            _worldPosition.Longitude = Longitude;
+            _worldPosition.Latitude = Latitude;
+            return _worldPosition;
+        }
+    }
+
     private Single PrevLongitude { get; set; }
     private Single PrevLatitude { get; set; }
     public Single AMSL { get; set; }
     public UInt64 PlaneID { get; set; }
     public UInt64[] Crew { get; set; } // As their IDs
     public UInt64[] Load { get; set; } // As Cargo IDs
-    public (float Longitude, float Latitude) CurrentPositionLonLat
-    {
-        get
-        {
-            // Get the origin and target airports from the DataBaseManager
-            Airport originAirport = DataBaseManager.Airports[Origin];
-            Airport targetAirport = DataBaseManager.Airports[Target];
-
-            // Convert the origin and target coordinates to quaternions
-            Quaternion origin = QuaternionHelper.LonLatToQuaternion(originAirport.Longitude, originAirport.Latitude);
-            Quaternion target = QuaternionHelper.LonLatToQuaternion(targetAirport.Longitude, targetAirport.Latitude);
-
-            // Calculate the flight progress
-            float flightProgress = Progress;
-
-            // Perform spherical interpolation
-            Quaternion currentPosition = Quaternion.Slerp(origin, target, flightProgress);
-
-            // Quaternion has the property that q and -q represent the same rotation
-            // If the dot product of the current position and the target is negative, the current position is the opposite of the target
-            if (Quaternion.Dot(currentPosition, target) < 0)
-                currentPosition = -currentPosition;
-            // Convert the interpolated position back to longitude and latitude
-            (float currentLongitude, float currentLatitude) = QuaternionHelper.QuaternionToLonLat(currentPosition);
-          return (currentLongitude, currentLatitude);
-        }
-    }
 
     public float Progress
     {
@@ -98,6 +80,7 @@ public class Flight : DataBaseObject
             return flightProgress;
         }
     }
+
     public double RotationRadians
     {
         get
@@ -112,7 +95,6 @@ public class Flight : DataBaseObject
 
             // Calculate the rotation in radians relative to the vector (0, 1)
             double rotation = Math.Atan2(deltaX, deltaY);
-
             return rotation;
         }
     }
@@ -120,9 +102,34 @@ public class Flight : DataBaseObject
     /*
      * Methods
      */
+    public (float Longitude, float Latitude) CalcCurrentPositionLonLat()
+    {
+        // Get the origin and target airports from the DataBaseManager
+        Airport originAirport = DataBaseManager.Airports[Origin];
+        Airport targetAirport = DataBaseManager.Airports[Target];
+
+        // Convert the origin and target coordinates to quaternions
+        Quaternion origin = QuaternionHelper.LonLatToQuaternion(originAirport.Longitude, originAirport.Latitude);
+        Quaternion target = QuaternionHelper.LonLatToQuaternion(targetAirport.Longitude, targetAirport.Latitude);
+
+        // Calculate the flight progress
+        float flightProgress = Progress;
+
+        // Perform spherical interpolation
+        Quaternion currentPosition = Quaternion.Slerp(origin, target, flightProgress);
+
+        // Quaternion has the property that q and -q represent the same rotation
+        // If the dot product of the current position and the target is negative, the current position is the opposite of the target
+        if (Quaternion.Dot(currentPosition, target) < 0)
+            currentPosition = -currentPosition;
+        // Convert the interpolated position back to longitude and latitude
+        (float currentLongitude, float currentLatitude) = QuaternionHelper.QuaternionToLonLat(currentPosition);
+        return (currentLongitude, currentLatitude);
+    }
+
     public void UpdatePosition()
     {
-        (Longitude, Latitude) = CurrentPositionLonLat;
+        (Longitude, Latitude) = CalcCurrentPositionLonLat();
     }
 
     /*
@@ -130,7 +137,8 @@ public class Flight : DataBaseObject
      */
     public override void AddToCentral()
     {
-        if (!DataBaseManager.Flights.TryAdd(ID, this)) throw new InvalidOperationException("Flight with the same ID already exists.");
+        if (!DataBaseManager.Flights.TryAdd(ID, this))
+            throw new InvalidOperationException("Flight with the same ID already exists.");
     }
 
     /*
@@ -180,31 +188,42 @@ public class Flight : DataBaseObject
     public override void LoadFromByteArray(byte[] data)
     {
         int offset = 0;
-        ID = BitConverter.ToUInt64(data, offset); offset += sizeof(UInt64);
-        Origin = BitConverter.ToUInt64(data, offset); offset += sizeof(UInt64);
-        Target = BitConverter.ToUInt64(data, offset); offset += sizeof(UInt64);
+        ID = BitConverter.ToUInt64(data, offset);
+        offset += sizeof(UInt64);
+        Origin = BitConverter.ToUInt64(data, offset);
+        offset += sizeof(UInt64);
+        Target = BitConverter.ToUInt64(data, offset);
+        offset += sizeof(UInt64);
 
         // TakeoffTime taken as number of ms since Epoch(UTC) and parsed to DateTime
-        TakeoffTime = DateTimeOffset.FromUnixTimeMilliseconds(BitConverter.ToInt64(data, offset)).UtcDateTime; offset += sizeof(UInt64);
+        TakeoffTime = DateTimeOffset.FromUnixTimeMilliseconds(BitConverter.ToInt64(data, offset)).UtcDateTime;
+        offset += sizeof(UInt64);
         // LandingTime taken as number of ms since Epoch(UTC) and parsed to DateTime
-        LandingTime = DateTimeOffset.FromUnixTimeMilliseconds(BitConverter.ToInt64(data, offset)).UtcDateTime; offset += sizeof(UInt64);
+        LandingTime = DateTimeOffset.FromUnixTimeMilliseconds(BitConverter.ToInt64(data, offset)).UtcDateTime;
+        offset += sizeof(UInt64);
 
         // Since there is a bug in the NetworkSourceManager, there can be flights where the TakeoffTime is after the LandingTime
         // In this case we add a day to the LandingTime
         if (TakeoffTime > LandingTime) LandingTime = LandingTime.AddDays(1);
 
-        PlaneID = BitConverter.ToUInt64(data, offset); offset += sizeof(UInt64);
-        UInt16 CrewLength = BitConverter.ToUInt16(data, offset); offset += sizeof(UInt16);
+        PlaneID = BitConverter.ToUInt64(data, offset);
+        offset += sizeof(UInt64);
+        UInt16 CrewLength = BitConverter.ToUInt16(data, offset);
+        offset += sizeof(UInt16);
         Crew = new UInt64[CrewLength];
         for (int i = 0; i < CrewLength; i++)
         {
-            Crew[i] = BitConverter.ToUInt64(data, offset); offset += sizeof(UInt64);
+            Crew[i] = BitConverter.ToUInt64(data, offset);
+            offset += sizeof(UInt64);
         }
-        UInt16 LoadLength = BitConverter.ToUInt16(data, offset); offset += sizeof(UInt16);
+
+        UInt16 LoadLength = BitConverter.ToUInt16(data, offset);
+        offset += sizeof(UInt16);
         Load = new UInt64[LoadLength];
         for (int i = 0; i < LoadLength; i++)
         {
-            Load[i] = BitConverter.ToUInt64(data, offset); offset += sizeof(UInt64);
+            Load[i] = BitConverter.ToUInt64(data, offset);
+            offset += sizeof(UInt64);
         }
 
         // Longitude, Latitude and AMSL are not used in this method

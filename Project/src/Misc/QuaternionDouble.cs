@@ -1,6 +1,6 @@
 /*
  * This is a copy-pasted code snippet from the System.Numerics namespace in the .NET reference source.
- * The only change was to make the Quaternion operate on double values instead of double values.
+ * The only change was to make the Quaternion operate on double values instead of float values.
  * This is a workaround for the lack of a Quaternion working on doubles or being templated in the System.Numerics namespace.
  */
 

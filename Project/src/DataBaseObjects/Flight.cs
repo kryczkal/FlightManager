@@ -15,9 +15,9 @@ public class Flight : DataBaseObject
     public ulong Target { get; set; } // As Airport ID
     public DateTime TakeoffTime { get; set; }
     public DateTime LandingTime { get; set; }
-    private float _longitude;
+    private double _longitude;
 
-    public float Longitude
+    public double Longitude
     {
         get => _longitude;
         set
@@ -27,9 +27,9 @@ public class Flight : DataBaseObject
         }
     }
 
-    private float _latitude;
+    private double _latitude;
 
-    public float Latitude
+    public double Latitude
     {
         get => _latitude;
         set
@@ -45,20 +45,20 @@ public class Flight : DataBaseObject
     {
         get
         {
-            _worldPosition.Longitude = Longitude;
-            _worldPosition.Latitude = Latitude;
+            _worldPosition.Longitude = (double)Longitude;
+            _worldPosition.Latitude = (double)Latitude;
             return _worldPosition;
         }
     }
 
-    private float PrevLongitude { get; set; }
-    private float PrevLatitude { get; set; }
+    private double PrevLongitude { get; set; }
+    private double PrevLatitude { get; set; }
     public float AMSL { get; set; }
     public ulong PlaneID { get; set; }
     public ulong[] Crew { get; set; } // As their IDs
     public ulong[] Load { get; set; } // As Cargo IDs
 
-    public float Progress
+    public double Progress
     {
         get
         {
@@ -71,7 +71,7 @@ public class Flight : DataBaseObject
             var elapsedTimeTicks = currentTime.Ticks - TakeoffTime.Ticks;
 
             // Calculate the flight progress as a float between 0 and 1
-            var flightProgress = (float)elapsedTimeTicks / totalFlightDurationTicks;
+            var flightProgress = (double)elapsedTimeTicks / totalFlightDurationTicks;
 
             // Ensure the flight progress is within the range [0, 1]
             flightProgress = Math.Max(0, flightProgress);
@@ -86,15 +86,32 @@ public class Flight : DataBaseObject
         get
         {
             // Convert longitude and latitude to x, y coordinates
-            var previousPositionXY = SphericalMercator.FromLonLat(PrevLongitude, PrevLatitude);
-            var currentPositionXY = SphericalMercator.FromLonLat(Longitude, Latitude);
+            (double x, double y) previousPositionXY = SphericalMercator.FromLonLat(PrevLongitude, PrevLatitude);
+            (double x, double y) currentPositionXY = SphericalMercator.FromLonLat(Longitude, Latitude);
 
-            // Calculate the difference in x and y coordinates
-            var deltaX = currentPositionXY.x - previousPositionXY.x;
-            var deltaY = currentPositionXY.y - previousPositionXY.y;
+            // Calculate the magnitudes of the vectors
+            double previousMagnitude = Math.Sqrt(previousPositionXY.x * previousPositionXY.x + previousPositionXY.y * previousPositionXY.y);
+            double currentMagnitude = Math.Sqrt(currentPositionXY.x * currentPositionXY.x + currentPositionXY.y * currentPositionXY.y);
+
+            // Calculate the maximum magnitude
+            double maxMagnitude = Math.Max(previousMagnitude, currentMagnitude);
+            const double scaleFactor = 1e15;
+
+            // Calculate the scaling factors
+            double previousScaleFactor = scaleFactor / maxMagnitude;
+            double currentScaleFactor = scaleFactor / maxMagnitude;
+
+            // Scale both vectors to add precision
+            previousPositionXY.x *= previousScaleFactor;
+            previousPositionXY.y *= previousScaleFactor;
+            currentPositionXY.x *= currentScaleFactor;
+            currentPositionXY.y *= currentScaleFactor;
+
+            double deltaX = currentPositionXY.x - previousPositionXY.x;
+            double deltaY = currentPositionXY.y - previousPositionXY.y;
 
             // Calculate the rotation in radians relative to the vector (0, 1)
-            var rotation = Math.Atan2(deltaX, deltaY);
+            double rotation = Math.Atan2(deltaX, deltaY);
             return rotation;
         }
     }
@@ -102,7 +119,7 @@ public class Flight : DataBaseObject
     /*
      * Methods
      */
-    public (float Longitude, float Latitude) CalcCurrentPositionLonLat()
+    public (double Longitude, double Latitude) CalcCurrentPositionLonLat()
     {
         // Get the origin and target airports from the DataBaseManager
         var originAirport = DataBaseManager.Airports[Origin];
@@ -116,11 +133,11 @@ public class Flight : DataBaseObject
         var flightProgress = Progress;
 
         // Perform spherical interpolation
-        var currentPosition = Quaternion.Slerp(origin, target, flightProgress);
+        var currentPosition = QuaternionDouble.Slerp(origin, target, flightProgress);
 
         // Quaternion has the property that q and -q represent the same rotation
         // If the dot product of the current position and the target is negative, the current position is the opposite of the target
-        if (Quaternion.Dot(currentPosition, target) < 0)
+    if (QuaternionDouble.Dot(currentPosition, target) < 0)
             currentPosition = -currentPosition;
         // Convert the interpolated position back to longitude and latitude
         (var currentLongitude, var currentLatitude) = QuaternionHelper.QuaternionToLonLat(currentPosition);

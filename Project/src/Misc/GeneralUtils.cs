@@ -50,28 +50,28 @@ public class GeneralUtils
 
 public static class QuaternionHelper
 {
-    public static Quaternion LonLatToQuaternion(float longitude, float latitude)
+    public static QuaternionDouble LonLatToQuaternion(double longitude, double latitude)
     {
         // Convert longitude and latitude to radians
-        var lonRad = MathF.PI / 180f * longitude;
-        var latRad = MathF.PI / 180f * latitude;
+        var lonRad = Math.PI / 180f * longitude;
+        var latRad = Math.PI / 180f * latitude;
 
         // Convert spherical coordinates to a quaternion
-        var x = MathF.Cos(latRad) * MathF.Cos(lonRad);
-        var y = MathF.Cos(latRad) * MathF.Sin(lonRad);
-        var z = MathF.Sin(latRad);
+        double x = Math.Cos(latRad) * Math.Cos(lonRad);
+        double y = Math.Cos(latRad) * Math.Sin(lonRad);
+        double z = Math.Sin(latRad);
 
-        return new Quaternion(x, y, z, 0);
+        return new QuaternionDouble(x, y, z, 0);
     }
 
-    public static (float Longitude, float Latitude) QuaternionToLonLat(Quaternion position)
+    public static (double Longitude, double Latitude) QuaternionToLonLat(QuaternionDouble position)
     {
         // Normalize the quaternion
-        position = Quaternion.Normalize(position);
+        position = QuaternionDouble.Normalize(position);
 
         // Convert quaternion to spherical coordinates
-        var latitude = 180f / MathF.PI * MathF.Asin(position.Z);
-        var longitude = 180f / MathF.PI * MathF.Atan2(position.Y, position.X);
+        var latitude = 180f / Math.PI * Math.Asin(position.Z);
+        var longitude = 180f / Math.PI * Math.Atan2(position.Y, position.X);
 
         return (longitude, latitude);
     }

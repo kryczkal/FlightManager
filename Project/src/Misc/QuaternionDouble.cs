@@ -87,7 +87,7 @@ namespace System.Numerics
         {
             double ls = X * X + Y * Y + Z * Z + W * W;
 
-            return (double)Math.Sqrt((double)ls);
+            return Math.Sqrt(ls);
         }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace System.Numerics
 
             double ls = value.X * value.X + value.Y * value.Y + value.Z * value.Z + value.W * value.W;
 
-            double invNorm = 1.0f / (double)Math.Sqrt((double)ls);
+            double invNorm = 1.0f / Math.Sqrt(ls);
 
             ans.X = value.X * invNorm;
             ans.Y = value.Y * invNorm;
@@ -172,8 +172,8 @@ namespace System.Numerics
             QuaternionDouble ans;
 
             double halfAngle = angle * 0.5f;
-            double s = (double)Math.Sin(halfAngle);
-            double c = (double)Math.Cos(halfAngle);
+            double s = Math.Sin(halfAngle);
+            double c = Math.Cos(halfAngle);
 
             ans.X = axis.X * s;
             ans.Y = axis.Y * s;
@@ -197,16 +197,16 @@ namespace System.Numerics
             double sr, cr, sp, cp, sy, cy;
 
             double halfRoll = roll * 0.5f;
-            sr = (double)Math.Sin(halfRoll);
-            cr = (double)Math.Cos(halfRoll);
+            sr = Math.Sin(halfRoll);
+            cr = Math.Cos(halfRoll);
 
             double halfPitch = pitch * 0.5f;
-            sp = (double)Math.Sin(halfPitch);
-            cp = (double)Math.Cos(halfPitch);
+            sp = Math.Sin(halfPitch);
+            cp = Math.Cos(halfPitch);
 
             double halfYaw = yaw * 0.5f;
-            sy = (double)Math.Sin(halfYaw);
-            cy = (double)Math.Cos(halfYaw);
+            sy = Math.Sin(halfYaw);
+            cy = Math.Cos(halfYaw);
 
             QuaternionDouble result;
 
@@ -231,7 +231,7 @@ namespace System.Numerics
 
             if (trace > 0.0f)
             {
-                double s = (double)Math.Sqrt(trace + 1.0f);
+                double s = Math.Sqrt(trace + 1.0f);
                 q.W = s * 0.5f;
                 s = 0.5f / s;
                 q.X = (matrix.M23 - matrix.M32) * s;
@@ -242,7 +242,7 @@ namespace System.Numerics
             {
                 if (matrix.M11 >= matrix.M22 && matrix.M11 >= matrix.M33)
                 {
-                    double s = (double)Math.Sqrt(1.0f + matrix.M11 - matrix.M22 - matrix.M33);
+                    double s = Math.Sqrt(1.0f + matrix.M11 - matrix.M22 - matrix.M33);
                     double invS = 0.5f / s;
                     q.X = 0.5f * s;
                     q.Y = (matrix.M12 + matrix.M21) * invS;
@@ -251,7 +251,7 @@ namespace System.Numerics
                 }
                 else if (matrix.M22 > matrix.M33)
                 {
-                    double s = (double)Math.Sqrt(1.0f + matrix.M22 - matrix.M11 - matrix.M33);
+                    double s = Math.Sqrt(1.0f + matrix.M22 - matrix.M11 - matrix.M33);
                     double invS = 0.5f / s;
                     q.X = (matrix.M21 + matrix.M12) * invS;
                     q.Y = 0.5f * s;
@@ -260,7 +260,7 @@ namespace System.Numerics
                 }
                 else
                 {
-                    double s = (double)Math.Sqrt(1.0f + matrix.M33 - matrix.M11 - matrix.M22);
+                    double s = Math.Sqrt(1.0f + matrix.M33 - matrix.M11 - matrix.M22);
                     double invS = 0.5f / s;
                     q.X = (matrix.M31 + matrix.M13) * invS;
                     q.Y = (matrix.M32 + matrix.M23) * invS;
@@ -320,13 +320,13 @@ namespace System.Numerics
             }
             else
             {
-                double omega = (double)Math.Acos(cosOmega);
-                double invSinOmega = (double)(1 / Math.Sin(omega));
+                double omega = Math.Acos(cosOmega);
+                double invSinOmega = 1 / Math.Sin(omega);
 
-                s1 = (double)Math.Sin((1.0f - t) * omega) * invSinOmega;
+                s1 = Math.Sin((1.0f - t) * omega) * invSinOmega;
                 s2 = (flip)
-                    ? (double)-Math.Sin(t * omega) * invSinOmega
-                    : (double)Math.Sin(t * omega) * invSinOmega;
+                    ? -Math.Sin(t * omega) * invSinOmega
+                    : Math.Sin(t * omega) * invSinOmega;
             }
 
             QuaternionDouble ans;
@@ -373,7 +373,7 @@ namespace System.Numerics
 
             // Normalize it.
             double ls = r.X * r.X + r.Y * r.Y + r.Z * r.Z + r.W * r.W;
-            double invNorm = 1.0f / (double)Math.Sqrt((double)ls);
+            double invNorm = 1.0f / Math.Sqrt(ls);
 
             r.X *= invNorm;
             r.Y *= invNorm;

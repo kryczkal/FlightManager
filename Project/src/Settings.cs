@@ -12,9 +12,9 @@ public static class Settings
     /*
      * Gui Simulation settings
      */
-    public static bool IsSimulationRealTime { get; private set; } = true;
+    public static bool IsSimulationRealTime { get; private set; } = false;
     public static int SimulationSpeedMultiplier { get; private set; } = 1000;
-    public static int GuiUpdateIntervalMs { get; private set; } = 1;
+    public static int GuiUpdateIntervalMs { get; private set; } = 10;
 
     /*
      * Non editable members

@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using DataTransformation;
 using Products;
+using projob.media;
 
 namespace projob;
 
@@ -41,6 +42,15 @@ public static class DataBaseManager
 
         data = PassengerPlanes.Values.ToList<IDataTransformable>();
         DataTransformationUtils.SerializeObjListToFile(data, filePath, serializer);
+    }
+
+    public static List<IReportable> GetReportableObjects()
+    {
+        var reportableObjects = new List<IReportable>();
+        reportableObjects.AddRange(Airports.Values);
+        reportableObjects.AddRange(CargoPlanes.Values);
+        reportableObjects.AddRange(PassengerPlanes.Values);
+        return reportableObjects;
     }
 }
 

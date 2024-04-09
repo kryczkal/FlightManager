@@ -1,9 +1,10 @@
 using DataTransformation;
 using projob;
+using projob.media;
 
 namespace Products;
 
-public class Airport : DataBaseObject
+public class Airport : DataBaseObject, IReportable
 {
     private static readonly string _type = "Airport";
     public override string Type => _type;
@@ -76,5 +77,13 @@ public class Airport : DataBaseObject
         offset += sizeof(float);
         ISOCountryCode = System.Text.Encoding.ASCII.GetString(data, offset, 3);
         offset += 3;
+    }
+
+    /*
+     * IReportable implementation
+     */
+    public string AcceptMediaReport(Media media)
+    {
+        return media.ReportAirport(this);
     }
 }

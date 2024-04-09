@@ -1,16 +1,17 @@
 using DataTransformation;
 using projob;
+using projob.media;
 
 namespace Products;
 
-public class PassengerPlane : DataBaseObject
+public class PassengerPlane : DataBaseObject, IReportable
 {
     private static readonly string _type = "PassengerPlane";
     public string Type => _type;
     public ulong ID { get; set; }
     public string Serial { get; set; }
     public string ISOCountryCode { get; set; }
-    public string Model { get; set; }
+    public string Name { get; set; }
     public ushort FirstClassSize { get; set; }
     public ushort BusinessClassSize { get; set; }
     public ushort EconomyClassSize { get; set; }
@@ -32,7 +33,7 @@ public class PassengerPlane : DataBaseObject
         ID = ulong.Parse(data[0]);
         Serial = data[1];
         ISOCountryCode = data[2];
-        Model = data[3];
+        Name = data[3];
         FirstClassSize = ushort.Parse(data[4]);
         BusinessClassSize = ushort.Parse(data[5]);
         EconomyClassSize = ushort.Parse(data[6]);
@@ -45,7 +46,7 @@ public class PassengerPlane : DataBaseObject
         data[1] = ID.ToString();
         data[2] = Serial;
         data[3] = ISOCountryCode;
-        data[4] = Model;
+        data[4] = Name;
         data[5] = FirstClassSize.ToString();
         data[6] = BusinessClassSize.ToString();
         data[7] = EconomyClassSize.ToString();
@@ -68,7 +69,7 @@ public class PassengerPlane : DataBaseObject
         offset += 3;
         var ModelLength = BitConverter.ToUInt16(data, offset);
         offset += sizeof(ushort);
-        Model = System.Text.Encoding.ASCII.GetString(data, offset, ModelLength);
+        Name = System.Text.Encoding.ASCII.GetString(data, offset, ModelLength);
         offset += ModelLength;
         FirstClassSize = BitConverter.ToUInt16(data, offset);
         offset += sizeof(ushort);
@@ -76,5 +77,13 @@ public class PassengerPlane : DataBaseObject
         offset += sizeof(ushort);
         EconomyClassSize = BitConverter.ToUInt16(data, offset);
         offset += sizeof(ushort);
+    }
+
+    /*
+     * IReportable implementation
+     */
+    public string AcceptMediaReport(Media media)
+    {
+        return media.ReportPassengerPlane(this);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using DataTransformation;
 using NetworkSourceSimulator;
+using projob.media;
 
 namespace projob;
 
@@ -23,13 +24,22 @@ public static class Program
 
     public static void ConsoleWork(NetworkSourceManager networkSourceManager)
     {
+        // Setting up snapshot functionality
         var serializer = new SerializerFactory().CreateProduct("json");
         if (serializer == null) throw new Exception("Serializer not found");
+
+        // Setting up news generator
+        List<Media> mediaList = new List<Media>
+        {
+            new Newspaper("CNN"),
+            new Radio("BBC Radio"),
+            new Television()
+        };
 
         var running = true;
         while (running)
         {
-            Console.WriteLine("Enter a command: ");
+            Console.Write("Enter a command: ");
             var command = Console.ReadLine();
             switch (command)
             {
@@ -38,6 +48,16 @@ public static class Program
                     break;
                 case "print":
                     DataBaseManager.MakeSnapshot(serializer);
+                    break;
+                case "report":
+                    var newsGenerator = new NewsGenerator(mediaList, DataBaseManager.GetReportableObjects());
+                    foreach (var news in newsGenerator.GenerateNextNews())
+                    {
+                        Console.WriteLine(news);
+                    }
+                    break;
+                case "clear":
+                    Console.Clear();
                     break;
             }
         }

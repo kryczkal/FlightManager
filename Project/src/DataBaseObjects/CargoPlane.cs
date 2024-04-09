@@ -1,16 +1,17 @@
 using DataTransformation;
 using projob;
+using projob.media;
 
 namespace Products;
 
-public class CargoPlane : DataBaseObject
+public class CargoPlane : DataBaseObject, IReportable
 {
     private static readonly string _type = "CargoPlane";
     public override string Type => _type;
     public ulong ID { get; set; }
     public string Serial { get; set; }
     public string ISOCountryCode { get; set; }
-    public string Model { get; set; }
+    public string Name { get; set; }
     public float MaxLoad { get; set; }
 
     /*
@@ -30,7 +31,7 @@ public class CargoPlane : DataBaseObject
         ID = ulong.Parse(data[0]);
         Serial = data[1];
         ISOCountryCode = data[2];
-        Model = data[3];
+        Name = data[3];
         MaxLoad = float.Parse(data[4]);
     }
 
@@ -41,7 +42,7 @@ public class CargoPlane : DataBaseObject
         data[1] = ID.ToString();
         data[2] = Serial;
         data[3] = ISOCountryCode;
-        data[4] = Model;
+        data[4] = Name;
         data[5] = MaxLoad.ToString();
         return data;
     }
@@ -62,9 +63,17 @@ public class CargoPlane : DataBaseObject
         offset += 3;
         var ModelLength = BitConverter.ToUInt16(data, offset);
         offset += sizeof(ushort);
-        Model = System.Text.Encoding.ASCII.GetString(data, offset, ModelLength);
+        Name = System.Text.Encoding.ASCII.GetString(data, offset, ModelLength);
         offset += ModelLength;
         MaxLoad = BitConverter.ToSingle(data, offset);
         offset += sizeof(float);
+    }
+
+    /*
+     * IReportable interface implementation
+     */
+    public string AcceptMediaReport(Media media)
+    {
+        return media.ReportCargoPlane(this);
     }
 }

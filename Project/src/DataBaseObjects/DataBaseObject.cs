@@ -1,9 +1,10 @@
 using DataTransformation;
 using projob;
+using projob.media;
 
 namespace Products;
 
-public class DataBaseObject : Serializable, IDataTransformable, IAddableToCentral
+public abstract class DataBaseObject : Serializable, IDataTransformable, IAddableToCentral
 {
     /*
      * Properties
@@ -13,31 +14,13 @@ public class DataBaseObject : Serializable, IDataTransformable, IAddableToCentra
     /*
      * Central database functions
      */
-    public virtual void AddToCentral()
-    {
-        throw new InvalidOperationException("This method should be overriden in the derived class.");
-    }
+    public abstract void AddToCentral();
 
     /*
      * Format compliancy functions
      */
-    public virtual string[] SaveToFtrString()
-    {
-        throw new InvalidOperationException("This method should be overriden in the derived class.");
-    }
-
-    public virtual void LoadFromFtrString(string[] data)
-    {
-        throw new InvalidOperationException("This method should be overriden in the derived class.");
-    }
-
-    public virtual byte[] SaveToByteArray()
-    {
-        throw new InvalidOperationException("This method should be overriden in the derived class.");
-    }
-
-    public virtual void LoadFromByteArray(byte[] data)
-    {
-        throw new InvalidOperationException("This method should be overriden in the derived class.");
-    }
+    public abstract string[] SaveToFtrString();
+    public abstract void LoadFromFtrString(string[] data);
+    public abstract byte[] SaveToByteArray();
+    public abstract void LoadFromByteArray(byte[] data);
 }

@@ -33,6 +33,7 @@ public abstract class BaseHandler : ILoggerHandler
 
 public class ConsoleHandler : BaseHandler
 {
+    // ConsoleHandler doesn't require concurrency protection as it's thread safe
     public override void Handle(string message, LogLevel logLevel)
     {
         if (logLevel == LogLevel.Info)
@@ -60,6 +61,8 @@ public class FileHandler : BaseHandler
     }
     public override void Handle(string message, LogLevel logLevel)
     {
+        // FileHandler requires concurrency protection
+        lock(_logFilePath) {
         if (logLevel == LogLevel.Info)
         {
             File.WriteAllText(_logFilePath, $"Info: {message}");
@@ -73,6 +76,7 @@ public class FileHandler : BaseHandler
             File.WriteAllText(_logFilePath, $"Error: {message}");
         }
         base.Handle(message, logLevel);
+        }
     }
 }
 

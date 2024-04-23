@@ -1,3 +1,6 @@
+using System.Collections;
+using projob.DataBaseObjects;
+
 namespace DataTransformation;
 
 public static class DataTransformationUtils
@@ -26,5 +29,16 @@ public static class DataTransformationUtils
         where T : IDataTransformable
     {
         foreach (var obj in objs) SerializeObjToFile<T>(obj, filePath, serializer);
+    }
+
+    public static IEnumerable<DataBaseObject?> DeserializeFileToObjList(string filePath, IDeserializer deserializer)
+    {
+        // Read the file and split the data into an array
+        string[] data = File.ReadAllText(filePath).Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
+        foreach (var obj in data)
+        {
+            // Deserialize the data and yield return it
+            yield return deserializer.Deserialize(obj);
+        }
     }
 }

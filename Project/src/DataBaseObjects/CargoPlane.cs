@@ -1,5 +1,6 @@
 using DataTransformation;
 using projob;
+using projob.DataBaseObjects;
 using projob.media;
 
 namespace Products;
@@ -8,7 +9,7 @@ public class CargoPlane : DataBaseObject, IReportable
 {
     private static readonly string _type = "CargoPlane";
     public override string Type => _type;
-    public ulong ID { get; set; }
+
     public string Serial { get; set; }
     public string ISOCountryCode { get; set; }
     public string Name { get; set; }
@@ -17,9 +18,18 @@ public class CargoPlane : DataBaseObject, IReportable
     /*
      * Central database functions
      */
-    public override void AddToCentral()
+    public override void UpdateObjReferences(DataBaseObject sender, ulong oldId, ulong newId)
     {
-        if (!DataBaseManager.CargoPlanes.TryAdd(ID, this))
+    }
+
+    public override List<ulong>? GetReferencedIds()
+    {
+        return null;
+    }
+
+    public override void AcceptAddToCentral()
+    {
+        if (!DataBaseManager.CargoPlanes.TryAdd(Id, this))
             throw new InvalidOperationException("CargoPlane with the same ID already exists.");
     }
 
@@ -28,7 +38,7 @@ public class CargoPlane : DataBaseObject, IReportable
      */
     public override void LoadFromFtrString(string[] data)
     {
-        ID = ulong.Parse(data[0]);
+        Id = ulong.Parse(data[0]);
         Serial = data[1];
         ISOCountryCode = data[2];
         Name = data[3];
@@ -39,7 +49,7 @@ public class CargoPlane : DataBaseObject, IReportable
     {
         string[] data = new string[6];
         data[0] = Type;
-        data[1] = ID.ToString();
+        data[1] = Id.ToString();
         data[2] = Serial;
         data[3] = ISOCountryCode;
         data[4] = Name;
@@ -55,7 +65,7 @@ public class CargoPlane : DataBaseObject, IReportable
     public override void LoadFromByteArray(byte[] data)
     {
         var offset = 0;
-        ID = BitConverter.ToUInt64(data, offset);
+        Id = BitConverter.ToUInt64(data, offset);
         offset += sizeof(ulong);
         Serial = System.Text.Encoding.ASCII.GetString(data, offset, 10);
         offset += 10;

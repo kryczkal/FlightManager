@@ -1,5 +1,4 @@
 using Products;
-
 namespace projob.media;
 
 public interface IReportable

@@ -1,9 +1,13 @@
+using System.Net;
+using Microsoft.VisualBasic;
+
 namespace projob;
 
 public enum LogLevel
 {
-    Info,
+    // Log levels in increasing order of severity
     Debug,
+    Info,
     Error
 }
 public interface ILoggerHandler
@@ -15,7 +19,6 @@ public interface ILoggerHandler
 public abstract class BaseHandler : ILoggerHandler
 {
     private ILoggerHandler? _nextHandler;
-
     public ILoggerHandler? SetNext(ILoggerHandler? handler)
     {
         _nextHandler = handler;
@@ -34,19 +37,17 @@ public abstract class BaseHandler : ILoggerHandler
 public class ConsoleHandler : BaseHandler
 {
     // ConsoleHandler doesn't require concurrency protection as it's thread safe
+    private LogLevel _minLogLevel;
+
+    public ConsoleHandler(LogLevel minLogLevel)
+    {
+        _minLogLevel = minLogLevel;
+    }
     public override void Handle(string message, LogLevel logLevel)
     {
-        if (logLevel == LogLevel.Info)
+        if (logLevel >= _minLogLevel)
         {
-            Console.WriteLine($"Info: {message}");
-        }
-        else if (logLevel == LogLevel.Debug)
-        {
-            Console.WriteLine($"Debug: {message}");
-        }
-        else if (logLevel == LogLevel.Error)
-        {
-            Console.WriteLine($"Error: {message}");
+            Console.WriteLine(Settings.LoggerSettings.LogFormat, DateTime.Now, logLevel.ToString(), message);
         }
         base.Handle(message, logLevel);
     }
@@ -55,28 +56,23 @@ public class ConsoleHandler : BaseHandler
 public class FileHandler : BaseHandler
 {
     private string _logFilePath;
-    public FileHandler(string logFilePath)
+    private LogLevel _minLogLevel;
+    public FileHandler(LogLevel minLogLevel, string logFilePath)
     {
+        _minLogLevel = minLogLevel;
         _logFilePath = logFilePath;
     }
     public override void Handle(string message, LogLevel logLevel)
     {
         // FileHandler requires concurrency protection
-        lock(_logFilePath) {
-        if (logLevel == LogLevel.Info)
+        if (logLevel >= _minLogLevel)
         {
-            File.WriteAllText(_logFilePath, $"Info: {message}");
-        }
-        else if (logLevel == LogLevel.Debug)
-        {
-            File.WriteAllText(_logFilePath, $"Debug: {message}");
-        }
-        else if (logLevel == LogLevel.Error)
-        {
-            File.WriteAllText(_logFilePath, $"Error: {message}");
+            lock (_logFilePath)
+            {
+                File.AppendAllLines(_logFilePath, new[] { string.Format(Settings.LoggerSettings.LogFormat, DateTime.Now, logLevel.ToString(), message) });
+            }
         }
         base.Handle(message, logLevel);
-        }
     }
 }
 

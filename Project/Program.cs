@@ -1,6 +1,5 @@
-﻿using System.Numerics;
-using DataTransformation;
-using NetworkSourceSimulator;
+﻿using DataTransformation;
+using projob.DataBaseObjects;
 using projob.media;
 
 namespace projob;
@@ -9,20 +8,25 @@ public static class Program
 {
     public static void Main(string[] args)
     {
+        DataBaseManager.LoadFromFtrFile(Settings.DataBaseManager.LoadPath);
+        DataBaseManager.CreateObjReferences();
+
         var networkSourceManager = new NetworkSourceManager(
             new NetworkSourceSimulator.NetworkSourceSimulator(
-                Settings.LoadPath,
-                Settings.minSimulationOffset,
-                Settings.maxSimulationOffset),
+                Settings.NetworkSourceSimulator.LoadPath,
+                Settings.NetworkSourceSimulator.MinSimulationOffset,
+                Settings.NetworkSourceSimulator.MaxSimulationOffset),
             true
         );
 
+        //List<DataBaseObject> allObjects = DataBaseManager.GetAllObjects();
+
         networkSourceManager.RunParallel();
         GuiManager.RunParallel();
-        ConsoleWork(networkSourceManager);
+        ConsoleWork();
     }
 
-    public static void ConsoleWork(NetworkSourceManager networkSourceManager)
+    public static void ConsoleWork()
     {
         // Setting up snapshot functionality
         var serializer = new SerializerFactory().CreateProduct("json");

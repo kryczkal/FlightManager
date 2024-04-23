@@ -3,14 +3,15 @@ using System.Numerics;
 using DataTransformation;
 using Mapsui.Projections;
 using projob;
+using projob.DataBaseObjects;
 
 namespace Products;
 
 public class Flight : DataBaseObject
 {
     private static readonly string _type = "Flight";
-    public string Type => _type;
-    public ulong ID { get; set; }
+    public override string Type => _type;
+
     public ulong Origin { get; set; } // As Airport ID
     public ulong Target { get; set; } // As Airport ID
     public DateTime TakeoffTime { get; set; }
@@ -152,10 +153,55 @@ public class Flight : DataBaseObject
     /*
      * Central database functions
      */
-    public override void AddToCentral()
+    public override void UpdateObjReferences(DataBaseObject sender, ulong oldId, ulong newId)
     {
-        if (!DataBaseManager.Flights.TryAdd(ID, this))
-            throw new InvalidOperationException("Flight with the same ID already exists.");
+        if (Origin == oldId)
+        {
+            Origin = newId;
+            GlobalLogger.Log($"Updating reference of {Id}. Origin reference updated from {oldId} to {newId}", LogLevel.Debug);
+            return;
+        }
+
+        if (Target == oldId)
+        {
+            Target = newId;
+            GlobalLogger.Log($"Updating reference of {Id}. Target reference updated from {oldId} to {newId}", LogLevel.Debug);
+            return;
+        }
+
+        for (var i = 0; i < Crew.Length; i++)
+        {
+            if (Crew[i] == oldId)
+            {
+                Crew[i] = newId;
+                GlobalLogger.Log($"Updating reference of {Id}. Crew reference updated from {oldId} to {newId}", LogLevel.Debug);
+                return;
+            }
+        }
+
+        for (var i = 0; i < Load.Length; i++)
+        {
+            if (Load[i] == oldId)
+            {
+                Load[i] = newId;
+                GlobalLogger.Log($"Updating reference of {Id}. Load reference updated from {oldId} to {newId}", LogLevel.Debug);
+                return;
+            }
+        }
+    }
+
+    public override List<ulong>? GetReferencedIds()
+    {
+        var ids = new List<ulong> { Origin, Target };
+        ids.AddRange(Crew);
+        ids.AddRange(Load);
+        return ids;
+    }
+
+    public override void AcceptAddToCentral()
+    {
+        if (!DataBaseManager.Flights.TryAdd(Id, this))
+            GlobalLogger.Log($"Flight with ID {Id} already exists in the database.", LogLevel.Error);
     }
 
     /*
@@ -163,7 +209,7 @@ public class Flight : DataBaseObject
      */
     public override void LoadFromFtrString(string[] data)
     {
-        ID = ulong.Parse(data[0]);
+        Id = ulong.Parse(data[0]);
         Origin = ulong.Parse(data[1]);
         Target = ulong.Parse(data[2]);
 
@@ -183,7 +229,7 @@ public class Flight : DataBaseObject
     {
         string[] data = new string[12];
         data[0] = Type;
-        data[1] = ID.ToString();
+        data[1] = Id.ToString();
         data[2] = Origin.ToString();
         data[3] = Target.ToString();
         data[4] = TakeoffTime.ToString("HH:mm");
@@ -205,7 +251,7 @@ public class Flight : DataBaseObject
     public override void LoadFromByteArray(byte[] data)
     {
         var offset = 0;
-        ID = BitConverter.ToUInt64(data, offset);
+        Id = BitConverter.ToUInt64(data, offset);
         offset += sizeof(ulong);
         Origin = BitConverter.ToUInt64(data, offset);
         offset += sizeof(ulong);

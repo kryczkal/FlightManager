@@ -1,5 +1,6 @@
 using DataTransformation;
 using projob;
+using projob.DataBaseObjects;
 using projob.media;
 
 namespace Products;
@@ -8,7 +9,6 @@ public class Airport : DataBaseObject, IReportable
 {
     private static readonly string _type = "Airport";
     public override string Type => _type;
-    public ulong ID { get; set; }
     public string Name { get; set; }
     public string Code { get; set; }
     public float Longitude { get; set; }
@@ -19,9 +19,18 @@ public class Airport : DataBaseObject, IReportable
     /*
      * Central database functions
      */
-    public override void AddToCentral()
+    public override void UpdateObjReferences(DataBaseObject sender, ulong oldId, ulong newId)
     {
-        if (!DataBaseManager.Airports.TryAdd(ID, this))
+    }
+
+    public override List<ulong>? GetReferencedIds()
+    {
+        return null;
+    }
+
+    public override void AcceptAddToCentral()
+    {
+        if (!DataBaseManager.Airports.TryAdd(Id, this))
             throw new InvalidOperationException("Airport with the same ID already exists.");
     }
 
@@ -30,7 +39,7 @@ public class Airport : DataBaseObject, IReportable
      */
     public override void LoadFromFtrString(string[] data)
     {
-        ID = ulong.Parse(data[0]);
+        Id = ulong.Parse(data[0]);
         Name = data[1];
         Code = data[2];
         Longitude = float.Parse(data[3]);
@@ -43,7 +52,7 @@ public class Airport : DataBaseObject, IReportable
     {
         string[] data = new string[8];
         data[0] = _type;
-        data[1] = ID.ToString();
+        data[1] = Id.ToString();
         data[2] = Name;
         data[3] = Code;
         data[4] = Longitude.ToString();
@@ -61,7 +70,7 @@ public class Airport : DataBaseObject, IReportable
     public override void LoadFromByteArray(byte[] data)
     {
         var offset = 0;
-        ID = BitConverter.ToUInt64(data, offset);
+        Id = BitConverter.ToUInt64(data, offset);
         offset += sizeof(ulong);
         var nameLength = BitConverter.ToUInt16(data, offset);
         offset += sizeof(ushort);

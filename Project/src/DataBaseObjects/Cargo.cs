@@ -1,13 +1,14 @@
 using DataTransformation;
 using projob;
+using projob.DataBaseObjects;
 
 namespace Products;
 
 public class Cargo : DataBaseObject
 {
     private static readonly string _type = "Cargo";
-    public virtual string Type => _type;
-    public ulong ID { get; set; }
+    public override string Type => _type;
+
     public float Weight { get; set; }
     public string Code { get; set; }
     public string Description { get; set; }
@@ -15,9 +16,18 @@ public class Cargo : DataBaseObject
     /*
      * Central database functions
      */
-    public override void AddToCentral()
+    public override void UpdateObjReferences(DataBaseObject sender, ulong oldId, ulong newId)
     {
-        if (!DataBaseManager.Cargos.TryAdd(ID, this))
+    }
+
+    public override List<ulong>? GetReferencedIds()
+    {
+        return null;
+    }
+
+    public override void AcceptAddToCentral()
+    {
+        if (!DataBaseManager.Cargos.TryAdd(Id, this))
             throw new InvalidOperationException("Cargo with the same ID already exists.");
     }
 
@@ -26,7 +36,7 @@ public class Cargo : DataBaseObject
      */
     public override void LoadFromFtrString(string[] data)
     {
-        ID = ulong.Parse(data[0]);
+        Id = ulong.Parse(data[0]);
         Weight = float.Parse(data[1]);
         Code = data[2];
         Description = data[3];
@@ -36,7 +46,7 @@ public class Cargo : DataBaseObject
     {
         string[] data = new string[5];
         data[0] = Type;
-        data[1] = ID.ToString();
+        data[1] = Id.ToString();
         data[2] = Weight.ToString();
         data[3] = Code;
         data[4] = Description;
@@ -51,7 +61,7 @@ public class Cargo : DataBaseObject
     public override void LoadFromByteArray(byte[] data)
     {
         var offset = 0;
-        ID = BitConverter.ToUInt64(data, offset);
+        Id = BitConverter.ToUInt64(data, offset);
         offset += sizeof(ulong);
         Weight = BitConverter.ToSingle(data, offset);
         offset += sizeof(float);

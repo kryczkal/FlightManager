@@ -1,5 +1,6 @@
 using DataTransformation;
 using Factory;
+using projob.DataBaseObjects;
 
 namespace Products;
 

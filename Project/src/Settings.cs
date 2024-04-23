@@ -3,11 +3,22 @@ namespace projob;
 public static class Settings
 {
     /*
+     * Database settings
+     */
+    public static class DataBaseManager
+    {
+        public static string LoadPath { get; private set; } = "assets/example_data.ftr";
+    }
+    /*
      * Network Source settings
      */
-    public static string LoadPath { get; private set; } = "assets/example_data.ftr";
-    public static int minSimulationOffset { get; private set; } = 2;
-    public static int maxSimulationOffset { get; private set; } = 3;
+    public static class NetworkSourceSimulator
+    {
+        public static string LoadPath { get; private set; } = "assets/example_data.ftre";
+        public static int MinSimulationOffset { get; private set; } = 2;
+        public static int MaxSimulationOffset { get; private set; } = 3;
+
+    }
 
     /*
      * Gui Simulation settings
@@ -15,6 +26,19 @@ public static class Settings
     public static bool IsSimulationRealTime { get; private set; } = false;
     public static int SimulationSpeedMultiplier { get; private set; } = 1000;
     public static int GuiUpdateIntervalMs { get; private set; } = 10;
+
+    public static class LoggerSettings
+    {
+        static LoggerSettings()
+        {
+            LoggerChain = new ConsoleHandler(LogLevel.Info);
+            LoggerChain.SetNext(new FileHandler(LogLevel.Info, LogFilePath));
+        }
+
+        public static string LogFormat => "{0:u} {1}: {2}";
+        public static string LogFilePath => "log.txt";
+        public static ILoggerHandler? LoggerChain { get; }
+    }
 
     /*
      * Non editable members

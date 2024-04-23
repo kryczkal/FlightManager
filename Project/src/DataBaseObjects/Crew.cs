@@ -1,13 +1,14 @@
 using DataTransformation;
 using projob;
+using projob.DataBaseObjects;
 
 namespace Products;
 
 public class Crew : DataBaseObject
 {
     private static readonly string _type = "Crew";
-    public string Type => _type;
-    public ulong ID { get; set; }
+    public override string Type => _type;
+
     public string Name { get; set; }
     public ulong Age { get; set; }
     public string Phone { get; set; }
@@ -18,9 +19,18 @@ public class Crew : DataBaseObject
     /*
      * Central database functions
      */
-    public override void AddToCentral()
+    public override void UpdateObjReferences(DataBaseObject sender, ulong oldId, ulong newId)
     {
-        if (!DataBaseManager.Crews.TryAdd(ID, this))
+    }
+
+    public override List<ulong>? GetReferencedIds()
+    {
+        return null;
+    }
+
+    public override void AcceptAddToCentral()
+    {
+        if (!DataBaseManager.Crews.TryAdd(Id, this))
             throw new InvalidOperationException("Crew with the same ID already exists.");
     }
 
@@ -29,7 +39,7 @@ public class Crew : DataBaseObject
      */
     public override void LoadFromFtrString(string[] data)
     {
-        ID = ulong.Parse(data[0]);
+        Id = ulong.Parse(data[0]);
         Name = data[1];
         Age = ulong.Parse(data[2]);
         Phone = data[3];
@@ -42,7 +52,7 @@ public class Crew : DataBaseObject
     {
         string[] data = new string[7];
         data[0] = Type;
-        data[1] = ID.ToString();
+        data[1] = Id.ToString();
         data[2] = Name;
         data[3] = Age.ToString();
         data[4] = Phone;
@@ -60,7 +70,7 @@ public class Crew : DataBaseObject
     public override void LoadFromByteArray(byte[] data)
     {
         var offset = 0;
-        ID = BitConverter.ToUInt64(data, offset);
+        Id = BitConverter.ToUInt64(data, offset);
         offset += sizeof(ulong);
         var NameLength = BitConverter.ToUInt16(data, offset);
         offset += sizeof(short);

@@ -71,7 +71,7 @@ public static class GuiManager
 
         public override ulong GetID(int index)
         {
-            return DataBaseFlights[index].ID;
+            return DataBaseFlights[index].Id;
         }
 
         public override WorldPosition GetPosition(int index)

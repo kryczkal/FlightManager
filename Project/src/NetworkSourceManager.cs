@@ -2,6 +2,7 @@ using DataTransformation;
 using DataTransformation.Binary;
 using NetworkSourceSimulator;
 using Products;
+using projob.DataBaseObjects;
 
 namespace projob;
 
@@ -84,6 +85,9 @@ public class NetworkSourceManager
     private void SimulateNetworkSource(NetworkSourceSimulator.NetworkSourceSimulator networkSource)
     {
         networkSource.OnNewDataReady += SetLastMessageId;
+        networkSource.OnIDUpdate += ChangeId;
+        networkSource.OnPositionUpdate += UpdatePosition;
+        networkSource.OnContactInfoUpdate += UpdateContactInfo;
         networkSource.Run();
     }
 
@@ -94,8 +98,59 @@ public class NetworkSourceManager
     /// <param name="newDataReadyArgs">The event arguments.</param>
     private void SetLastMessageId(object sender, NewDataReadyArgs newDataReadyArgs)
     {
-        Console.WriteLine($"New data is ready! {newDataReadyArgs.MessageIndex}");
+        GlobalLogger.Log($"New data is ready at {newDataReadyArgs.MessageIndex}", LogLevel.Debug);
         _atomicLastMessageIndex.Set(newDataReadyArgs.MessageIndex);
+    }
+    /// <summary>
+    /// Changes the ID of an object in the database and updates the references.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="idUpdateArgs"></param>
+    /// <exception cref="Exception"></exception>
+    private void ChangeId(object sender, IDUpdateArgs idUpdateArgs)
+    {
+        DataBaseManager.UpdateId(idUpdateArgs.ObjectID, idUpdateArgs.NewObjectID);
+    }
+    /// <summary>
+    /// Updates the position of the flight object in the database.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="positionUpdateArgs"></param>
+    /// <exception cref="Exception"></exception>
+    private void UpdatePosition(object sender, PositionUpdateArgs positionUpdateArgs)
+    {
+        // Get the flight object from the database
+        Flight? flight;
+        if (!DataBaseManager.Flights.TryGetValue(positionUpdateArgs.ObjectID, out flight))
+        {
+            GlobalLogger.Log($"Flight with ID {positionUpdateArgs.ObjectID} does not exist in the database.", LogLevel.Error);
+            return;
+        }
+        // Update the position of the flight
+        GlobalLogger.Log($"Updating position of flight {flight.Id} to {positionUpdateArgs.Latitude}, {positionUpdateArgs.Longitude}", LogLevel.Info);
+
+        //flight.UpdatePosition();
+    }
+    /// <summary>
+    /// Get the crew object from the database and update the contact info.
+    /// </summary>
+    /// <param name="sender"> sender </param>
+    /// <param name="contactInfoUpdateArgs"> class containing the object id, new phone number and new email</param>
+    /// <exception cref="Exception"></exception>
+    private void UpdateContactInfo(object sender, ContactInfoUpdateArgs contactInfoUpdateArgs)
+    {
+        // Get the flight object from the database
+        Crew? crew;
+        if (!DataBaseManager.Crews.TryGetValue(contactInfoUpdateArgs.ObjectID, out crew))
+        {
+            GlobalLogger.Log($"Crew with ID {contactInfoUpdateArgs.ObjectID} does not exist in the database.", LogLevel.Error);
+            return;
+        }
+        // Update the contact info of the crew
+        crew.Phone = contactInfoUpdateArgs.PhoneNumber;
+        crew.Email = contactInfoUpdateArgs.EmailAddress;
+
+        GlobalLogger.Log($"Updating contact info of crew {crew.Id} to {contactInfoUpdateArgs.PhoneNumber}, {contactInfoUpdateArgs.EmailAddress}", LogLevel.Info);
     }
 
     private void FlushMessageToCentral(object sender, NewDataReadyArgs newDataReadyArgs)
@@ -103,7 +158,7 @@ public class NetworkSourceManager
         var instance = _deserializer!.Deserialize(
             BinaryStringAdapter.BinAsString(_networkSource.GetMessageAt(newDataReadyArgs.MessageIndex).MessageBytes));
         if (instance == null) throw new Exception("Instance is null");
-        instance.AddToCentral();
+        instance.AcceptAddToCentral();
     }
 
     /// <summary>
@@ -116,7 +171,7 @@ public class NetworkSourceManager
             var instance = _deserializer!.Deserialize(
                 BinaryStringAdapter.BinAsString(_networkSource.GetMessageAt(i).MessageBytes));
             if (instance == null) throw new Exception("Instance is null");
-            instance.AddToCentral();
+            instance.AcceptAddToCentral();
         }
 
         _sharedIndexTracker.Set(_atomicLastMessageIndex.Value);

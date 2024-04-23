@@ -2,12 +2,14 @@ using FlightTrackerGUI;
 using FlightTrackerData;
 using Mapsui.Projections;
 using Products;
+using projob.DataBaseObjects;
 
 namespace projob;
 
 public static class GuiManager
 {
     private static DatabaseFlightGUIData _flightsGuiData = new();
+    private static List<Flight> _flightsToKill = new();
 
     public static void RunParallel()
     {
@@ -39,10 +41,23 @@ public static class GuiManager
 
     public static void UpdateData()
     {
-        foreach (var flight in DataBaseManager.Flights.Values) flight.UpdatePosition();
+        foreach (var flight in DataBaseManager.Flights.Values) flight.RecalcPosition();
 
-        _flightsGuiData.UpdateFlights(DataBaseManager.Flights.Values.ToList());
+        List<Flight> flights = DataBaseManager.Flights.Values.ToList();
+        flights.AddRange(_flightsToKill);
+        _flightsGuiData.UpdateFlights(flights);
+        _flightsToKill.Clear();
         Runner.UpdateGUI(_flightsGuiData);
+    }
+
+    public static void KillFlight(ulong id)
+    {
+        _flightsToKill.Add(new Flight()
+        {
+            Id = id,
+            Latitude = 0,
+            Longitude = 0,
+        });
     }
 
     // An adapter class to provide the data to the GUI

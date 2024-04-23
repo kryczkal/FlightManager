@@ -2,7 +2,6 @@ using DataTransformation;
 using DataTransformation.Binary;
 using NetworkSourceSimulator;
 using Products;
-using projob.DataBaseObjects;
 
 namespace projob;
 
@@ -128,8 +127,8 @@ public class NetworkSourceManager
         }
         // Update the position of the flight
         GlobalLogger.Log($"Updating position of flight {flight.Id} to {positionUpdateArgs.Latitude}, {positionUpdateArgs.Longitude}", LogLevel.Info);
-
-        //flight.UpdatePosition();
+        flight.UpdateLastKnownPosition(new WorldPosition(positionUpdateArgs.Latitude, positionUpdateArgs.Longitude));
+        flight.AMSL = positionUpdateArgs.AMSL;
     }
     /// <summary>
     /// Get the crew object from the database and update the contact info.

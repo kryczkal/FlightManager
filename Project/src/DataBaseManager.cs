@@ -100,6 +100,7 @@ public static class DataBaseManager
         }else if (Flights.TryGetValue(oldId, out Flight? flight))
         {
             Flights.TryRemove(oldId, out _);
+            GuiManager.KillFlight(oldId);
             Flights.TryAdd(newId, flight);
             GlobalLogger.Log($"Updated ID of {flight.Type} {oldId} to ID {newId}", LogLevel.Info);
         }else if (Passengers.TryGetValue(oldId, out Passenger? passenger))

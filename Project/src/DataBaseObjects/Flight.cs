@@ -46,8 +46,8 @@ public class Flight : DataBaseObject
     {
         get
         {
-            _worldPosition.Longitude = (double)Longitude;
-            _worldPosition.Latitude = (double)Latitude;
+            _worldPosition.Longitude = Longitude;
+            _worldPosition.Latitude = Latitude;
             return _worldPosition;
         }
     }
@@ -59,6 +59,14 @@ public class Flight : DataBaseObject
     public ulong[] Crew { get; set; } // As their IDs
     public ulong[] Load { get; set; } // As Cargo IDs
 
+    private WorldPosition? _lastKnownWorldPosition = null;
+    private DateTime _lastPositionUpdateTime;
+
+    public Flight()
+    {
+        _lastPositionUpdateTime = TakeoffTime;
+    }
+
     public double Progress
     {
         get
@@ -66,7 +74,7 @@ public class Flight : DataBaseObject
             var currentTime = Settings.SimulationTime;
 
             // Calculate the total flight duration in ticks
-            var totalFlightDurationTicks = LandingTime.Ticks - TakeoffTime.Ticks;
+            var totalFlightDurationTicks = LandingTime.Ticks - _lastPositionUpdateTime.Ticks;
 
             // Calculate the elapsed time since takeoff in ticks
             var elapsedTimeTicks = currentTime.Ticks - TakeoffTime.Ticks;
@@ -87,12 +95,12 @@ public class Flight : DataBaseObject
         get
         {
             // Convert longitude and latitude to x, y coordinates
-            (double x, double y) previousPositionXY = SphericalMercator.FromLonLat(PrevLongitude, PrevLatitude);
-            (double x, double y) currentPositionXY = SphericalMercator.FromLonLat(Longitude, Latitude);
+            (double x, double y) previousPositionXy = SphericalMercator.FromLonLat(PrevLongitude, PrevLatitude);
+            (double x, double y) currentPositionXy = SphericalMercator.FromLonLat(Longitude, Latitude);
 
             // Calculate the magnitudes of the vectors
-            double previousMagnitude = Math.Sqrt(previousPositionXY.x * previousPositionXY.x + previousPositionXY.y * previousPositionXY.y);
-            double currentMagnitude = Math.Sqrt(currentPositionXY.x * currentPositionXY.x + currentPositionXY.y * currentPositionXY.y);
+            double previousMagnitude = Math.Sqrt(previousPositionXy.x * previousPositionXy.x + previousPositionXy.y * previousPositionXy.y);
+            double currentMagnitude = Math.Sqrt(currentPositionXy.x * currentPositionXy.x + currentPositionXy.y * currentPositionXy.y);
 
             // Calculate the maximum magnitude
             double maxMagnitude = Math.Max(previousMagnitude, currentMagnitude);
@@ -103,13 +111,13 @@ public class Flight : DataBaseObject
             double currentScaleFactor = scaleFactor / maxMagnitude;
 
             // Scale both vectors to add precision
-            previousPositionXY.x *= previousScaleFactor;
-            previousPositionXY.y *= previousScaleFactor;
-            currentPositionXY.x *= currentScaleFactor;
-            currentPositionXY.y *= currentScaleFactor;
+            previousPositionXy.x *= previousScaleFactor;
+            previousPositionXy.y *= previousScaleFactor;
+            currentPositionXy.x *= currentScaleFactor;
+            currentPositionXy.y *= currentScaleFactor;
 
-            double deltaX = currentPositionXY.x - previousPositionXY.x;
-            double deltaY = currentPositionXY.y - previousPositionXY.y;
+            double deltaX = currentPositionXy.x - previousPositionXy.x;
+            double deltaY = currentPositionXy.y - previousPositionXy.y;
 
             // Calculate the rotation in radians relative to the vector (0, 1)
             double rotation = Math.Atan2(deltaX, deltaY);
@@ -122,12 +130,18 @@ public class Flight : DataBaseObject
      */
     public (double Longitude, double Latitude) CalcCurrentPositionLonLat()
     {
-        // Get the origin and target airports from the DataBaseManager
-        var originAirport = DataBaseManager.Airports[Origin];
+        // Get the last known world position and target airport,
+        // if the last known world position is not set, set it to the origin airport
+        if (_lastKnownWorldPosition == null)
+        {
+            _lastKnownWorldPosition = new WorldPosition(DataBaseManager.Airports[Origin].Latitude, DataBaseManager.Airports[Origin].Longitude);
+            _lastPositionUpdateTime = Settings.SimulationTime;
+        }
+
         var targetAirport = DataBaseManager.Airports[Target];
 
         // Convert the origin and target coordinates to quaternions
-        var origin = QuaternionHelper.LonLatToQuaternion(originAirport.Longitude, originAirport.Latitude);
+        var origin = QuaternionHelper.LonLatToQuaternion(_lastKnownWorldPosition.Value.Longitude, _lastKnownWorldPosition.Value.Latitude);
         var target = QuaternionHelper.LonLatToQuaternion(targetAirport.Longitude, targetAirport.Latitude);
 
         // Calculate the flight progress
@@ -145,9 +159,16 @@ public class Flight : DataBaseObject
         return (currentLongitude, currentLatitude);
     }
 
-    public void UpdatePosition()
+    public void RecalcPosition()
     {
         (Longitude, Latitude) = CalcCurrentPositionLonLat();
+    }
+
+    public void UpdateLastKnownPosition(WorldPosition position)
+    {
+        _lastKnownWorldPosition = new WorldPosition(Latitude, Longitude);
+        _lastPositionUpdateTime = Settings.SimulationTime;
+        if (_lastPositionUpdateTime > LandingTime) LandingTime = LandingTime.AddDays(1);
     }
 
     /*
@@ -216,6 +237,10 @@ public class Flight : DataBaseObject
         // The ftr file contains only the hours and minutes of the day so we set the date to today
         TakeoffTime = DateTime.Today.Add(TimeSpan.Parse(data[3]));
         LandingTime = DateTime.Today.Add(TimeSpan.Parse(data[4]));
+        // Since there is a bug in the NetworkSourceManager, there can be flights where the TakeoffTime is after the LandingTime
+        // In this case we add a day to the LandingTime
+        if (TakeoffTime > LandingTime) LandingTime = LandingTime.AddDays(1);
+
 
         Longitude = float.Parse(data[5]);
         Latitude = float.Parse(data[6]);

@@ -1,5 +1,6 @@
 using projob;
 using projob.DataBaseObjects;
+using projob.DataBaseSQL;
 
 namespace Products;
 
@@ -14,6 +15,26 @@ public class Passenger : DataBaseObject
     public string Email { get; set; }
     public string Class { get; set; }
     public ulong Miles { get; set; }
+
+    public Passenger()
+    {
+        _sqlAccessors = new Dictionary<string, SqlAccessor>
+        {
+            {"ID", new SqlAccessor(() => Id.ToString(), (val) => Id = ulong.Parse(val))},
+            {"Name", new SqlAccessor(() => Name, (val) => Name = val)},
+            {"Age", new SqlAccessor(() => Age.ToString(), (val) => Age = ulong.Parse(val))},
+            {"Phone", new SqlAccessor(() => Phone, (val) => Phone = val)},
+            {"Email", new SqlAccessor(() => Email, (val) => Email = val)},
+            {"Class", new SqlAccessor(() => Class, (val) => Class = val)},
+            {"Miles", new SqlAccessor(() => Miles.ToString(), (val) => Miles = ulong.Parse(val))}
+        };
+    }
+
+    /*
+     * SQL Accessors
+     */
+    private Dictionary<string, SqlAccessor> _sqlAccessors;
+    public override Dictionary<string, SqlAccessor> Accessors => _sqlAccessors;
 
     /*
      * Central database functions

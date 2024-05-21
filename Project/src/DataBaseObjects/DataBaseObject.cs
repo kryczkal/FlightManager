@@ -1,8 +1,9 @@
 using DataTransformation;
+using projob.DataBaseSQL;
 
 namespace projob.DataBaseObjects;
 
-public abstract class DataBaseObject : Serializable, IDataTransformable, IAddableToCentral
+public abstract class DataBaseObject : Serializable, IDataTransformable, IAddableToCentral, ISqlAccessable
 {
     /*
      * Properties
@@ -61,4 +62,5 @@ public abstract class DataBaseObject : Serializable, IDataTransformable, IAddabl
     public abstract void LoadFromFtrString(string[] data);
     public abstract byte[] SaveToByteArray();
     public abstract void LoadFromByteArray(byte[] data);
+    public abstract Dictionary<string, SqlAccessor> Accessors { get; }
 }

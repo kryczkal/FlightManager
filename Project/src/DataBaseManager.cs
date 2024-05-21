@@ -63,6 +63,48 @@ public static class DataBaseManager
         GlobalLogger.Log($"Object with ID {id} does not exist in the database.", LogLevel.Error);
         return null;
     }
+
+    public static bool DeleteById(ulong id)
+    {
+        if (Airports.ContainsKey(id))
+            return Airports.TryRemove(id, out _);
+        if (Cargos.ContainsKey(id))
+            return Cargos.TryRemove(id, out _);
+        if (CargoPlanes.ContainsKey(id))
+            return CargoPlanes.TryRemove(id, out _);
+        if (Crews.ContainsKey(id))
+            return Crews.TryRemove(id, out _);
+        if (Flights.ContainsKey(id))
+            return Flights.TryRemove(id, out _);
+        if (Passengers.ContainsKey(id))
+            return Passengers.TryRemove(id, out _);
+        if (PassengerPlanes.ContainsKey(id))
+            return PassengerPlanes.TryRemove(id, out _);
+
+        return false;
+    }
+
+    public static bool CascadeDeleteById(ulong id)
+    {
+        if (References.TryGetValue(id, out DataBaseConsolidatedRelation? dataBaseConsolidatedRelation))
+        {
+            foreach (DataBaseObject reference in dataBaseConsolidatedRelation.References)
+            {
+                if (!CascadeDeleteById(reference.Id))
+                    return false;
+            }
+            if (!DeleteById(id))
+                return false;
+            return true;
+        }
+        return false;
+    }
+    public static void AddObj(DataBaseObject obj)
+    {
+        obj.AcceptAddToCentral();
+        GlobalLogger.Log($"Added {obj.Type} with ID {obj.Id}", LogLevel.Info);
+    }
+
     public static void UpdateId(ulong oldId, ulong newId)
     {
         if (References.TryGetValue(oldId, out DataBaseConsolidatedRelation? dataBaseConsolidatedRelation))
@@ -163,6 +205,7 @@ public static class DataBaseManager
             GlobalLogger.Log($"Loaded {obj.Type} with ID {obj.Id}", LogLevel.Debug);
         }
     }
+
 }
 
 public class DataBaseConsolidatedRelation

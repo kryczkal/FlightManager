@@ -1,5 +1,6 @@
 ﻿using DataTransformation;
 using projob.DataBaseObjects;
+using projob.DataBaseSQL;
 using projob.media;
 
 namespace projob;
@@ -19,11 +20,72 @@ public static class Program
             true
         );
 
-        //List<DataBaseObject> allObjects = DataBaseManager.GetAllObjects();
+        List<DataBaseObject> allObjects = DataBaseManager.GetAllObjects();
 
-        networkSourceManager.RunParallel();
-        GuiManager.RunParallel();
+        //networkSourceManager.RunParallel();
+        //GuiManager.RunParallel();
         ConsoleWork();
+
+        //SqlCommand command1 = new SelectCommand("Airport");
+        //command1.Append(
+        //    new DisplayCommand(new[] { "ID", "Name", "Code", "Longitude", "Latitude", "AMSL", "ISOCountryCode" }.ToList())
+        //    );
+        //command1.ExecuteChain();
+
+        //GlobalLogger.Log($"Airport Count {DataBaseManager.Airports.Count()}", LogLevel.Info);
+        //GlobalLogger.Log("Deleting all airports.", LogLevel.Info);
+
+        //SqlCommand command2 = new SelectCommand("Airport");
+        //command2.Append(new DeleteCommand());
+        //command2.ExecuteChain();
+
+        //GlobalLogger.Log($"Airport Count {DataBaseManager.Airports.Count()}", LogLevel.Info);
+
+        //SqlCommand command3 = new SelectCommand("Airport");
+        //command3.Append(
+        //    new DisplayCommand(new[] { "ID", "Name", "Code", "Longitude", "Latitude", "AMSL", "ISOCountryCode" }.ToList())
+        //    );
+        //command3.ExecuteChain();
+
+        //GlobalLogger.Log("Adding a new airport.", LogLevel.Info);
+
+        //SqlCommand command4 = new SelectCommand("Airport");
+
+        //command4.Append(
+        //    new AddCommand(
+        //    [
+        //            new("ID", "12"),
+        //    ])
+        //    );
+        //command4.ExecuteChain();
+        //GlobalLogger.Log($"{DataBaseManager.Airports.Count()}", LogLevel.Info);
+
+        //SqlCommand command5 = new SelectCommand("Airport");
+        //command5.Append(
+        //    new DisplayCommand(new[] { "ID", "Name", "Code", "Longitude", "Latitude", "AMSL", "ISOCountryCode" }.ToList())
+        //    );
+        //command5.ExecuteChain();
+
+        //// Update Airports
+        //SqlCommand command6 = new SelectCommand("Airport");
+        //command6.Append(
+        //    new UpdateCommand(
+        //    [
+        //            new("Name", "Test Airport Updated"),
+        //            new("Code", "TST Updated"),
+        //            new("Longitude", "420"),
+        //            new("Latitude", "69"),
+        //            new("AMSL", "123"),
+        //            new("ISOCountryCode", "TST Updated")
+        //    ])
+        //    );
+        //command6.ExecuteChain();
+
+        //SqlCommand command7 = new SelectCommand("Airport");
+        //command7.Append(
+        //    new DisplayCommand(new[] { "ID", "Name", "Code", "Longitude", "Latitude", "AMSL", "ISOCountryCode" }.ToList())
+        //    );
+        //command7.ExecuteChain();
     }
 
     public static void ConsoleWork()
@@ -62,6 +124,11 @@ public static class Program
                     break;
                 case "clear":
                     Console.Clear();
+                    break;
+                default:
+                    if (command == null) continue;
+                    SqlCommand? sqlCommand = QueryParser.ParseQuery(command);
+                    if (sqlCommand != null) sqlCommand.ExecuteChain();
                     break;
             }
         }

@@ -4,6 +4,7 @@ using DataTransformation;
 using Mapsui.Projections;
 using projob;
 using projob.DataBaseObjects;
+using projob.DataBaseSQL;
 
 namespace Products;
 
@@ -65,6 +66,21 @@ public class Flight : DataBaseObject
     public Flight()
     {
         _lastPositionUpdateTime = TakeoffTime;
+
+        _sqlAccessors = new Dictionary<string, SqlAccessor>
+        {
+            {"ID", new SqlAccessor(() => Id.ToString(), (val) => Id = ulong.Parse(val))},
+            {"Origin", new SqlAccessor(() => Origin.ToString(), (val) => Origin = ulong.Parse(val))},
+            {"Target", new SqlAccessor(() => Target.ToString(), (val) => Target = ulong.Parse(val))},
+            {"TakeoffTime", new SqlAccessor(() => TakeoffTime.ToString(), (val) => TakeoffTime = DateTime.Parse(val))},
+            {"LandingTime", new SqlAccessor(() => LandingTime.ToString(), (val) => LandingTime = DateTime.Parse(val))},
+            {"Longitude", new SqlAccessor(() => Longitude.ToString(), (val) => Longitude = double.Parse(val))},
+            {"Latitude", new SqlAccessor(() => Latitude.ToString(), (val) => Latitude = double.Parse(val))},
+            {"AMSL", new SqlAccessor(() => AMSL.ToString(), (val) => AMSL = float.Parse(val))},
+            {"PlaneID", new SqlAccessor(() => PlaneID.ToString(), (val) => PlaneID = ulong.Parse(val))},
+            {"Crew", new SqlAccessor(() => DataTransformation.Ftr.FtrUtils.FormatArray(Crew), (val) => Crew = DataTransformation.Ftr.FtrUtils.ParseArray<ulong>(val))},
+            {"Load", new SqlAccessor(() => DataTransformation.Ftr.FtrUtils.FormatArray(Load), (val) => Load = DataTransformation.Ftr.FtrUtils.ParseArray<ulong>(val))}
+        };
     }
 
     public double Progress
@@ -170,6 +186,12 @@ public class Flight : DataBaseObject
         _lastPositionUpdateTime = Settings.SimulationTime;
         if (_lastPositionUpdateTime > LandingTime) LandingTime = LandingTime.AddDays(1);
     }
+
+    /*
+     * SQL Accessors
+     */
+    private Dictionary<string, SqlAccessor> _sqlAccessors;
+    public override Dictionary<string, SqlAccessor> Accessors => _sqlAccessors;
 
     /*
      * Central database functions

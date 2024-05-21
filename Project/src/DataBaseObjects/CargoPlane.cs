@@ -1,6 +1,7 @@
 using DataTransformation;
 using projob;
 using projob.DataBaseObjects;
+using projob.DataBaseSQL;
 using projob.media;
 
 namespace Products;
@@ -14,6 +15,24 @@ public class CargoPlane : DataBaseObject, IReportable
     public string ISOCountryCode { get; set; }
     public string Name { get; set; }
     public float MaxLoad { get; set; }
+
+    public CargoPlane()
+    {
+        _sqlAccessors = new Dictionary<string, SqlAccessor>
+        {
+            {"ID", new SqlAccessor(() => Id.ToString(), (val) => Id = ulong.Parse(val))},
+            {"Serial", new SqlAccessor(() => Serial, (val) => Serial = val)},
+            {"ISOCountryCode", new SqlAccessor(() => ISOCountryCode, (val) => ISOCountryCode = val)},
+            {"Name", new SqlAccessor(() => Name, (val) => Name = val)},
+            {"MaxLoad", new SqlAccessor(() => MaxLoad.ToString(), (val) => MaxLoad = float.Parse(val))}
+        };
+    }
+
+    /*
+     * SQL Accessors
+     */
+    private Dictionary<string, SqlAccessor> _sqlAccessors;
+    public override Dictionary<string, SqlAccessor> Accessors => _sqlAccessors;
 
     /*
      * Central database functions

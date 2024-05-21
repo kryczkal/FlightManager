@@ -1,6 +1,7 @@
 using DataTransformation;
 using projob;
 using projob.DataBaseObjects;
+using projob.DataBaseSQL;
 using projob.media;
 
 namespace Products;
@@ -16,6 +17,26 @@ public class PassengerPlane : DataBaseObject, IReportable
     public ushort FirstClassSize { get; set; }
     public ushort BusinessClassSize { get; set; }
     public ushort EconomyClassSize { get; set; }
+
+    public PassengerPlane()
+    {
+        _sqlAccessors = new Dictionary<string, SqlAccessor>
+        {
+            {"ID", new SqlAccessor(() => Id.ToString(), (val) => Id = ulong.Parse(val))},
+            {"Serial", new SqlAccessor(() => Serial, (val) => Serial = val)},
+            {"ISOCountryCode", new SqlAccessor(() => ISOCountryCode, (val) => ISOCountryCode = val)},
+            {"Name", new SqlAccessor(() => Name, (val) => Name = val)},
+            {"FirstClassSize", new SqlAccessor(() => FirstClassSize.ToString(), (val) => FirstClassSize = ushort.Parse(val))},
+            {"BusinessClassSize", new SqlAccessor(() => BusinessClassSize.ToString(), (val) => BusinessClassSize = ushort.Parse(val))},
+            {"EconomyClassSize", new SqlAccessor(() => EconomyClassSize.ToString(), (val) => EconomyClassSize = ushort.Parse(val))}
+        };
+    }
+
+    /*
+     * SQL Accessors
+     */
+    private Dictionary<string, SqlAccessor> _sqlAccessors;
+    public override Dictionary<string, SqlAccessor> Accessors => _sqlAccessors;
 
     /*
      * Central database functions

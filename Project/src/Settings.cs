@@ -9,6 +9,7 @@ public static class Settings
     {
         public static string LoadPath { get; private set; } = "assets/example_data.ftr";
     }
+
     /*
      * Network Source settings
      */
@@ -17,7 +18,6 @@ public static class Settings
         public static string LoadPath { get; private set; } = "assets/example_data.ftre";
         public static int MinSimulationOffset { get; private set; } = 2;
         public static int MaxSimulationOffset { get; private set; } = 3;
-
     }
 
     /*
@@ -44,9 +44,18 @@ public static class Settings
     }
 
     /*
+     * SQL settings
+     */
+    public static class SQLSettings
+    {
+        public static bool CascadeDelete { get; private set; } = true;
+    }
+
+    /*
      * Non editable members
      */
     public static DateTime SimulationStartTime { get; } = DateTime.Now;
+
     public static DateTime SimulationTime
     {
         get
@@ -54,7 +63,8 @@ public static class Settings
             if (IsSimulationRealTime) return DateTime.Now;
 
             var realTimeElapsed = DateTime.Now - SimulationStartTime;
-            var simulatedTimeElapsed = TimeSpan.FromMilliseconds(realTimeElapsed.TotalMilliseconds * SimulationSpeedMultiplier);
+            var simulatedTimeElapsed =
+                TimeSpan.FromMilliseconds(realTimeElapsed.TotalMilliseconds * SimulationSpeedMultiplier);
 
             return SimulationStartTime + simulatedTimeElapsed;
         }

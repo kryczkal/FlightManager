@@ -1,6 +1,8 @@
+using System.Globalization;
 using DataTransformation;
 using projob;
 using projob.DataBaseObjects;
+using projob.DataBaseSQL;
 using projob.media;
 
 namespace Products;
@@ -15,6 +17,26 @@ public class Airport : DataBaseObject, IReportable
     public float Latitude { get; set; }
     public float AMSL { get; set; }
     public string ISOCountryCode { get; set; }
+
+    public Airport()
+    {
+        _sqlAccessors = new Dictionary<string, SqlAccessor>
+        {
+            {"ID", new SqlAccessor(() => Id.ToString(), (val) => Id = ulong.Parse(val))},
+            {"Name", new SqlAccessor(() => Name, (val) => Name = val)},
+            {"Code", new SqlAccessor(() => Code, (val) => Code = val)},
+            {"Longitude", new SqlAccessor(() => Longitude.ToString(CultureInfo.CurrentCulture), (val) => Longitude = float.Parse(val))},
+            {"Latitude", new SqlAccessor(() => Latitude.ToString(CultureInfo.CurrentCulture), (val) => Latitude = float.Parse(val))},
+            {"AMSL", new SqlAccessor(() => AMSL.ToString(CultureInfo.CurrentCulture), (val) => AMSL = float.Parse(val))},
+            {"ISOCountryCode", new SqlAccessor(() => ISOCountryCode, (val) => ISOCountryCode = val)}
+        };
+    }
+
+    /*
+     * SQL Accessors
+     */
+    private Dictionary<string, SqlAccessor> _sqlAccessors;
+    public override Dictionary<string, SqlAccessor> Accessors => _sqlAccessors;
 
     /*
      * Central database functions
@@ -87,6 +109,7 @@ public class Airport : DataBaseObject, IReportable
         ISOCountryCode = System.Text.Encoding.ASCII.GetString(data, offset, 3);
         offset += 3;
     }
+
 
     /*
      * IReportable implementation

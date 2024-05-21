@@ -1,6 +1,7 @@
 using DataTransformation;
 using projob;
 using projob.DataBaseObjects;
+using projob.DataBaseSQL;
 
 namespace Products;
 
@@ -12,6 +13,23 @@ public class Cargo : DataBaseObject
     public float Weight { get; set; }
     public string Code { get; set; }
     public string Description { get; set; }
+
+    public Cargo()
+    {
+        _sqlAccessors = new Dictionary<string, SqlAccessor>
+        {
+            {"ID", new SqlAccessor(() => Id.ToString(), (val) => Id = ulong.Parse(val))},
+            {"Weight", new SqlAccessor(() => Weight.ToString(), (val) => Weight = float.Parse(val))},
+            {"Code", new SqlAccessor(() => Code, (val) => Code = val)},
+            {"Description", new SqlAccessor(() => Description, (val) => Description = val)}
+        };
+    }
+
+    /*
+     * SQL Accessors
+     */
+    private Dictionary<string, SqlAccessor> _sqlAccessors;
+    public override Dictionary<string, SqlAccessor> Accessors => _sqlAccessors;
 
     /*
      * Central database functions

@@ -35,3 +35,7 @@ Logs capture all data alterations, including updates, ID changes, and failed ope
 Id: 1329, ID changed from 499 to 1329
 Operation UpdateId on object 1475 failed
 Id: 1073, Position changed from (157.99564, 3.403886, 11982) to (-145.21829, -87.924355, 292.1136)
+```
+
+## Credits
+Since the project assigment is the same, but the code is different, the description for this project is copied with knowing consent from [pietraldo](https://github.com/pietraldo/Airport-Management-System)
